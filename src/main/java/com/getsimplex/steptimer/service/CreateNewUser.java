@@ -31,9 +31,7 @@ public class CreateNewUser {
 
         addUser.setLocked(false);//new users start off with a clean slate
 
-        String userName = createUser.getUserName();
-        String password = createUser.getPassword();
-        String verifyPassword = createUser.getVerifyPassword();
+        String userName = createUser.getPhone();
         String email = createUser.getEmail();
         String phone = createUser.getPhone();
         String bday = createUser.getBirthDate();
@@ -53,15 +51,6 @@ public class CreateNewUser {
             }
         }
 
-        if(!password.equals(verifyPassword)){ //add validation - create method complexPW
-            throw new Exception("Passwords do not match");
-        }else if(!validatePassword(password)) {
-            throw new Exception ("Your password must contain a lowercase and uppercase letter, a number, a special character, and be between 6 and 40 characters long.");
-        }else{
-            String sha256HashPass = DigestUtils.sha256Hex(verifyPassword);
-            addUser.setPassword(sha256HashPass);
-            addUser.setVerifyPassword(sha256HashPass);
-        }
 
         if (email != null && !email.isEmpty()) {
                 addUser.setEmail(email);
@@ -90,37 +79,4 @@ public class CreateNewUser {
 
     }
 
-    // code borrowed from http://www.java2novice.com/java-collections-and-util/regex/valid-password/
-    // must contain one digit, one lower case char, one upper case char, some special chars, length should be within 6 to 15 chars.
-
-    private static Pattern pswPtrn =
-            Pattern.compile("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%!]).{6,40})");
-
-    // (?=.*  this means search to the right in the string for any number of characters
-    // \d this means a digit (0-9)
-
-    // so now we know we have found one digit
-
-    // [] this means a character set
-    // a-z this defines the range between a and z
-
-    // so now we know we have found one lower case letter
-
-    // A-Z this defines the range between a and z
-
-    // now we know we have found one upper case letter
-
-    // [] this means a character set
-    // @#$%! this defines the set
-
-    // now we know we have found a special character
-
-    public static boolean validatePassword(String password){
-
-        Matcher mtch = pswPtrn.matcher(password);
-        if(mtch.matches()){
-            return true;
-        }
-        return false;
-    }
 }
