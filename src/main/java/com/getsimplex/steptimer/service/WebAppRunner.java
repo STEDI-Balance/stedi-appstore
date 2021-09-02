@@ -68,7 +68,7 @@ public class WebAppRunner {
         });
 
         post("/login", (req, res)->loginUser(req));
-        post("/twofactorlogin:phoneNumber",(req, res) -> twoFactorLogin(req, res));
+        post("/twofactorlogin/:phoneNumber",(req, res) -> twoFactorLogin(req, res));
         post("/rapidsteptest", (req, res)->{
             try{
                 userFilter(req, res);
@@ -94,10 +94,11 @@ public class WebAppRunner {
         init();
     }
     private static String twoFactorLogin(Request request, Response response){
-        String phoneNumber =  request.params(":request");
+        String phoneNumber =  request.params(":phoneNumber");
         int randomNum = ThreadLocalRandom.current().nextInt(1111, 10000);
         User user=null;
         try {
+            phoneNumber = SendText.getFormattedPhone(phoneNumber);
             user = UserService.getUser(phoneNumber);
             if (user!=null){
                 SendText.send(phoneNumber, "STEDI OTP: "+String.valueOf(randomNum));

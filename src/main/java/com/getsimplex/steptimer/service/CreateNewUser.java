@@ -2,6 +2,8 @@ package com.getsimplex.steptimer.service;
 
 import com.google.gson.Gson;
 import com.getsimplex.steptimer.model.User;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import org.apache.commons.codec.digest.DigestUtils;
 import spark.Request;
 import java.util.*;
@@ -31,14 +33,16 @@ public class CreateNewUser {
 
         addUser.setLocked(false);//new users start off with a clean slate
 
-        String userName = createUser.getPhone();
+
         String email = createUser.getEmail();
         String phone = createUser.getPhone();
+        String formattedPhone = SendText.getFormattedPhone(phone);
+        createUser.setUserName(formattedPhone);
         String bday = createUser.getBirthDate();
         String deviceId = createUser.getDeviceNickName();
 
 
-        if (userName != null && !userName.isEmpty()) {
+        if (createUser.getUserName() != null && !createUser.getUserName().isEmpty()) {
 
             Optional<User> existingUser = JedisData.getEntityById(User.class,  createUser.getUserName());
 
@@ -47,7 +51,7 @@ public class CreateNewUser {
                 throw new Exception("Username already exists");
 
             } else {
-                addUser.setUserName(userName);
+                addUser.setUserName(createUser.getUserName());
             }
         }
 
@@ -58,7 +62,7 @@ public class CreateNewUser {
 
         if (phone != null && !phone.isEmpty()) {
 
-            addUser.setPhone(phone);
+            addUser.setPhone(formattedPhone);
         }
 
 
@@ -73,7 +77,7 @@ public class CreateNewUser {
 
 
         //SAVE USER TO REDIS
-        JedisData.loadToJedis(addUser, addUser.getUserName(), Long.valueOf(addUser.getPhone()));
+        JedisData.loadToJedis(addUser, addUser.getPhone(), 0l);
 
         return "Welcome: " + addUser.getUserName() + " Your account has been created, please login.";
 
