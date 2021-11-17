@@ -47,10 +47,10 @@ public class WebAppRunner {
                 response = callUserDatabase(req);
             } catch (AlreadyExistsException ae){
                 res.status(409);
-                System.out.println("User already exists");
+                logger.info("User already exists");
             } catch (Exception e){
                 res.status(500);
-                System.out.println("Error creating user");
+                logger.info("Error creating user");
             }
             return response;
         }
@@ -77,7 +77,6 @@ public class WebAppRunner {
 
             catch (AlreadyExistsException ae){
                 logger.info("User already exists");
-                System.out.println("User already exists");
                 res.status(409);
                 logger.info("Error creating customer");
                 response="Error creating customer";
@@ -85,7 +84,6 @@ public class WebAppRunner {
 
             catch (Exception e){
                 logger.warning("*** Error Creating Customer: "+e.getMessage());
-                System.out.println("*** Error Creating Customer: "+e.getMessage());
                 res.status(500);
                 response="Error creating customer";
             }
@@ -97,7 +95,6 @@ public class WebAppRunner {
             } catch (Exception e){
                 res.status(401);
                 logger.warning("*** Error Finding Customer: "+e.getMessage());
-                System.out.println("*** Error Finding Customer: "+e.getMessage());
                 return null;
             }
             return FindCustomer.handleRequest(req);
@@ -138,7 +135,6 @@ public class WebAppRunner {
             } catch (Exception e){
                 res.status(401);
                 logger.info("*** Error Finding Risk Score: "+e.getMessage());
-                System.out.println("*** Error Finding Risk Score: "+e.getMessage());
                 throw e;
             }
             return riskScore(req.params(":customer"));
@@ -188,13 +184,11 @@ public class WebAppRunner {
             } else{
                 response.status(400);
                 logger.info("Unable to find user with phone number: "+phoneNumber);
-                System.out.println("Unable to find user with phone number: "+phoneNumber);
 
             }
         } catch (Exception e){
             response.status(500);
             logger.info("Error while looking up user "+phoneNumber+" "+e.getMessage());
-            System.out.println("Error while looking up user "+phoneNumber+" "+e.getMessage());
         }
 
         if (user==null){
