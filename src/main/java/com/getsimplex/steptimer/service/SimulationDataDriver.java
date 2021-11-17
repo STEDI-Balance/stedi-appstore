@@ -9,10 +9,12 @@ import com.getsimplex.steptimer.model.StediEvent;
 import com.getsimplex.steptimer.utils.JedisData;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import java.util.logging.Logger;
 
 import java.util.*;
 
 public class SimulationDataDriver {
+    private static Logger logger = Logger.getLogger(SimulationDataDriver.class.getName());
 
     private static String[] lastNames = {"Jones", "Smith", "Ahmed", "Wu", "Doshi", "Anandh", "Clayton", "Harris", "Gonzalez", "Abram", "Khatib", "Clark", "Mitra", "Habschied", "Jackson", "Phillips", "Lincoln", "Spencer", "Anderson", "Hansen", "Davis", "Jones", "Fibonnaci", "Staples", "Jefferson", "Huey", "Olson", "Howard", "Sanchez", "Aristotle"};
     private static String[] firstNames = {"Sarah", "Bobby", "Frank", "Edward", "Danny", "Chris", "Spencer", "Ashley", "Santosh", "Senthil", "Christina", "Suresh", "Neeraj", "Angie", "Sean", "Lyn", "John", "Ben", "Travis", "David", "Larry", "Jerry", "Gail", "Craig", "Dan", "Jason", "Eric", "Trevor", "Jane", "Jacob", "Jaya", "Manoj", "Liz", "Christina"};
@@ -55,7 +57,7 @@ public class SimulationDataDriver {
                 CreateNewCustomer.createCustomer(customer);
                 testCustomers.add(customer);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                logger.info(e.getMessage());
             }
         }
 
@@ -111,11 +113,11 @@ public class SimulationDataDriver {
                          MessageIntake.route(deviceMessage);
 
                      } catch (Exception e) {
-                         System.out.println("Error retrieving risk score for customer: " + e.getMessage());
+                         logger.info("Error retrieving risk score for customer: " + e.getMessage());
                      }
                  }
              } catch (Exception e){
-                 System.out.println(e.getMessage());
+                 logger.info(e.getMessage());
              }
         }
     }

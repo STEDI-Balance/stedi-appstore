@@ -65,7 +65,7 @@ public class DeviceWebSocketHandler {
                 Thread.sleep(1000);//sleep for a second
 
                 session.getRemote().sendString("stepCount:"+i);
-                System.out.println("Step count: "+i);
+                logger.info("Step count: "+i);
             }
         } else if (message.contains("StartReading~")){
             SessionMessageResponse sessionMessage = new SessionMessageResponse();
