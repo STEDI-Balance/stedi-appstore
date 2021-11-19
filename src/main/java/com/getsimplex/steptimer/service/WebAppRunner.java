@@ -50,7 +50,7 @@ public class WebAppRunner {
                 logger.info("User already exists");
             } catch (Exception e){
                 res.status(500);
-                logger.info("Error creating user");
+                logger.warning("Error creating user");
             }
             return response;
         }
@@ -78,7 +78,7 @@ public class WebAppRunner {
             catch (AlreadyExistsException ae){
                 logger.info("User already exists");
                 res.status(409);
-                logger.info("Error creating customer");
+                logger.warning("Error creating customer");
                 response="Error creating customer";
             }
 
@@ -134,7 +134,7 @@ public class WebAppRunner {
                 userFilter(req, res);
             } catch (Exception e){
                 res.status(401);
-                logger.info("*** Error Finding Risk Score: "+e.getMessage());
+                logger.warning("*** Error Finding Risk Score: "+e.getMessage());
                 throw e;
             }
             return riskScore(req.params(":customer"));
@@ -188,7 +188,7 @@ public class WebAppRunner {
             }
         } catch (Exception e){
             response.status(500);
-            logger.info("Error while looking up user "+phoneNumber+" "+e.getMessage());
+            logger.warning("Error while looking up user "+phoneNumber+" "+e.getMessage());
         }
 
         if (user==null){
@@ -211,12 +211,12 @@ public class WebAppRunner {
             }
 
             if (!user.isPresent()) { //Check to see if session expired
-                logger.info("Invalid user token: user not found using token: "+tokenString);
+                logger.severe("Invalid user token: user not found using token: "+tokenString);
                 throw new Exception("Invalid user token: user not found using token: "+tokenString);
             }
 
             if (tokenExpired.equals(true)){
-                logger.info("Invalid user token: "+tokenString+" expired");
+                logger.warning("Invalid user token: "+tokenString+" expired");
                 throw new Exception("Invalid user token: "+tokenString+" expired");
             }
 

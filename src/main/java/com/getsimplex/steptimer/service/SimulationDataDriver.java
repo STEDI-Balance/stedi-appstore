@@ -57,7 +57,7 @@ public class SimulationDataDriver {
                 CreateNewCustomer.createCustomer(customer);
                 testCustomers.add(customer);
             } catch (Exception e) {
-                logger.info(e.getMessage());
+                logger.warning(e.getMessage());
             }
         }
 
@@ -113,11 +113,11 @@ public class SimulationDataDriver {
                          MessageIntake.route(deviceMessage);
 
                      } catch (Exception e) {
-                         logger.info("Error retrieving risk score for customer: " + e.getMessage());
+                         logger.severe("Error retrieving risk score for customer: " + e.getMessage());
                      }
                  }
              } catch (Exception e){
-                 logger.info(e.getMessage());
+                 logger.warning(e.getMessage());
              }
         }
     }
