@@ -36,8 +36,8 @@ repositories {
 dependencies {
     implementation 'org.jasypt:jasypt:1.9.2'
     implementation 'com.sparkjava:spark-core:2.9.3'
-    implementation 'com.j2html:j2html:0.7'
-    implementation 'com.google.code.gson:gson:2.3.1'
+    implementation 'com.j2html:j2html@0.88'
+    implementation 'com.google.code.gson:gson@2.8.9'
     implementation 'com.typesafe.akka:akka-actor_2.11:2.4.12'
     implementation 'com.typesafe.akka:akka-slf4j_2.11:2.4.12'
     implementation 'redis.clients:jedis:2.6.2'
