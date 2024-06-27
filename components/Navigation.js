@@ -155,7 +155,7 @@ export default function Navigation (props) {
                 // tabBarColor:'pink',
                    tabBarLabel: 'About',
                  tabBarIcon: ({ color }) => (
-                  <Ionicons name='md-information-circle-sharp' color={color} size={30} style={{ width: 30,  height: 30, marginTop: -3}}/>
+                  <Ionicons name='information-circle-sharp' color={color} size={30} style={{ width: 30,  height: 30, marginTop: -3}}/>
                   ),
                   }}
             />
