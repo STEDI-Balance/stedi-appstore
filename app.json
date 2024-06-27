@@ -6,12 +6,12 @@
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "13.0"
+            "deploymentTarget": "13.4"
           }
         }
       ],
       [
-        "@config-plugins/react-native-ble-plx",
+        "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
           "modes": [
@@ -35,7 +35,7 @@
     "ios": {
       "bundleIdentifier": "me.stedi",
       "runtimeVersion": {
-        "policy": "appVersion"
+        "policy": "sdkVersion"
       }
     },
     "android": {
