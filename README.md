@@ -8,7 +8,12 @@ To do an IOS Testflight build:
 
 `npx eas-cli build --profile production --platform ios`
 
-To do a dev client build:
-`npm run build-ios-apple-developer`
+To do an ios dev client build:
+`npm run build-ios-apple-devclient`
+
+To do an android dev client build:
+`npm run build-android-devclient`
+
+
 
 When the build finishes, open the Transporter app on a Mac to upload to Testflight
