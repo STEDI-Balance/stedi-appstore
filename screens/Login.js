@@ -15,7 +15,7 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
   const sendOTP = async () => {
 
       const loginResponse = await fetch(
-        `https://dev.stedi.me/twofactorlogin/${phoneNumber}`,
+        `https://dev.stedi.me/twofactorlogin/${phoneNumber}?region=US`,
         {
           method: 'POST',
           headers: {
@@ -42,7 +42,8 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
         },
         body: JSON.stringify({
           phoneNumber,
-          oneTimePassword
+          oneTimePassword,
+          region: 'US'
         }
         )
       }

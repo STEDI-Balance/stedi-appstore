@@ -9,15 +9,17 @@ import ProgressBar from 'react-native-progress/Bar';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PopupModal from '../components/PopupModal';
+import PopupBleModal from '../components/PopupBleModal';
 import ManuallyCounter from '../components/ManuallyCounter';
+import BleCounter from '../components/BleCounter';
 
 export default function Counter(props) {
   const [completionCount, setCompletionCount] = useState(0);
-  const [counter, setCounter] = useState(180); //(180 3 mins)
+  const [counter, setCounter] = useState(180); //(180 seconds = 3 minutes)
   const [score, setScore] = useState(0);
   const [currentScreen, setCurrentScreen] = useState('counter');
   const [shareToken, setShareToken] = useState("");
+  const [bleCharacteristic, setBleCharacteristic] = useState(0); // variable to keep track of what the BLE device is measuring
 
   useEffect(() => {
     const getUserName = async () => {
@@ -32,13 +34,13 @@ export default function Counter(props) {
 
   useEffect(() => {
     const redirect = async () => {
-      if (currentScreen == 'counter') {
-        if (completionCount == 1) {
+      if (currentScreen === 'counter') {
+        if (completionCount === 1) {
           setCurrentScreen('break');
           console.log('completionCount:', completionCount);
         }
-        else if (completionCount == 2) {
-          getResults();
+        else if (completionCount === 2) {
+          await getResults();
           setCurrentScreen('result');
         }
       }
@@ -48,8 +50,8 @@ export default function Counter(props) {
 
   useEffect(() => {
     counter > 0 && setTimeout(() => {
-      if (currentScreen == 'break') {
-        if (counter == 1) {
+      if (currentScreen === 'break') {
+        if (counter === 1) {
           setCurrentScreen('counter');
           setStepCount(0);
         }
@@ -60,15 +62,15 @@ export default function Counter(props) {
 
   const clockify = () => {
     let hours = Math.floor(counter / 60 / 60);
-    let mins = Math.floor(counter / 60 % 60);
+    let minutes = Math.floor(counter / 60 % 60);
     let seconds = Math.floor(counter % 60);
 
     let displayHours = hours < 10 ? `0${hours}` : hours;
-    let displayMins = mins < 10 ? `0${mins}` : mins;
+    let displayMinutes = minutes < 10 ? `0${minutes}` : minutes;
     let displaySeconds = seconds < 10 ? `0${seconds}` : seconds;
     return {
       displayHours,
-      displayMins,
+      displayMinutes: displayMinutes,
       displaySeconds,
     };
   };
@@ -201,6 +203,7 @@ export default function Counter(props) {
   const recentAccelerationData = useRef([]);
   const steps = useRef([]);
   const [stepCount, setStepCount] = useState(0);
+  let stepDone = useRef(true); //variable used with the BleCounter component to keep track of whether a step has been completed.
 
   const _subscribe = () => {
     setSubscription(true)
@@ -217,7 +220,7 @@ export default function Counter(props) {
       await savingSteps();
       _unsubscribe();
       setCompletionCount(completionCount + 1);
-      console.log('completationCount:', completionCount);
+      console.log('completionCount:', completionCount);
     } else {
       setStepCount(steps.current.length);
     }
@@ -228,6 +231,14 @@ export default function Counter(props) {
     setSubscription(null);
   };
 
+  // function to check if a new step has been taken
+  const { checkNewStep } = BleCounter({stepDone, tallyLatestSteps, bleCharacteristic});
+
+  // if the user is subscribed to the BLE characteristic, check for new steps
+  if (subscription) {
+    bleCharacteristic.onChange = checkNewStep();
+  }
+    
   useEffect(() => {
     steps.current = [];
     return () => _unsubscribe();
@@ -245,6 +256,10 @@ export default function Counter(props) {
             <Paragraph style={styles.titleText}>{stepCount}</Paragraph>
           </Card.Content>
           <ManuallyCounter visible={subscription} tallyLatestSteps={tallyLatestSteps} />
+          {/* a pop-up modal to prompt the user to connect to a BLE device */}
+          <PopupBleModal setBleCharacteristic={setBleCharacteristic}/>
+          <Text>BLE characteristic: {bleCharacteristic}</Text>
+          {checkNewStep}
           <TouchableOpacity onPress={_unsubscribe} style={styles.cancelButton} >
             <Icon name={'close-circle'} color='red' size={45} />
           </TouchableOpacity>
@@ -261,14 +276,14 @@ export default function Counter(props) {
   }
 
   else if (currentScreen === 'break') {
-    const { displayHours, displayMins, displaySeconds } = clockify();
+    const { displayHours, displayMinutes, displaySeconds } = clockify();
 
     return (
       <View style={styles.screen}>
         <Card style={styles.card}>
           <Card.Content>
             <Title style={styles.breakTitleText}>Relax while you can, next set starts in</Title>
-            <Paragraph style={styles.breakTitleText}>{`${displayMins}:${displaySeconds}`}</Paragraph>
+            <Paragraph style={styles.breakTitleText}>{`${displayMinutes}:${displaySeconds}`}</Paragraph>
           </Card.Content>
           <Image source={exerciseImg} style={styles.image} ></Image>
         </Card>
@@ -303,7 +318,7 @@ export default function Counter(props) {
             <Needle />
             <Progress />
             <Marks step={10} />
-            <Indicator />
+            <Indicator  fixValue/>
             <DangerPath />
           </Speedometer>
           <TouchableOpacity onPress={() => Linking.openURL('https://stedi.me')} style={styles.visitSiteButton}>
