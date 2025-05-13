@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "seanmurdockensign",
     "name": "STEDI App",
     "plugins": [
       [
