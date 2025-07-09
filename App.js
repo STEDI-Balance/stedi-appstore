@@ -1,13 +1,11 @@
 import React, { useEffect, useState,useRef } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity,TextInput, Button, Alert,Linking,ImageBackground, SafeAreaView} from 'react-native';
+import { StyleSheet } from 'react-native';
 import  Navigation from './components/Navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from './screens/OnboardingScreen';
-import DeviceModal from "./DeviceConnectionModal";
 import Login from './screens/Login';
 import { NavigationContainer } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import useBLE from "./useBLE";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,16 +22,6 @@ const App = () =>{
   const [onBoarded,setOnBoarded] = React.useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onBoardedRef = useRef(false);
-
-  const {
-    requestPermissions,
-    scanForPeripherals,
-    allDevices,
-    connectToDevice,
-    connectedDevice,
-    heartRate,
-    disconnectFromDevice,
-  } = useBLE();
 
   const scanForDevices = async () => {
     
