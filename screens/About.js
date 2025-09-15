@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, Text, StyleSheet, Linking } from 'react-native';
+import { Text, StyleSheet, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from 'react-native-paper';
 
 

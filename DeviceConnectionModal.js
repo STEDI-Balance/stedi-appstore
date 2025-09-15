@@ -3,11 +3,11 @@ import {
   FlatList,
   ListRenderItemInfo,
   Modal,
-  SafeAreaView,
   Text,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Device } from "react-native-ble-plx";
 
 // type DeviceModalListItemProps = {

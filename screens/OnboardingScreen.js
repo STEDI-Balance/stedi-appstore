@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
-import { SafeAreaView } from 'react-navigation';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,10 +23,13 @@ return(
 );
 }
 
-const Done = ({...props}) => {
+const Done = (props) => {
+  const { onPress, disabled, ...otherProps } = props;
   return(
-  <TouchableOpacity style={{margin: 15}}
-  {...props}
+  <TouchableOpacity 
+    style={{margin: 15}}
+    onPress={onPress}
+    disabled={disabled}
   >
   <Text>Done</Text></TouchableOpacity>
 )}
