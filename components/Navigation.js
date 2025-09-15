@@ -1,10 +1,11 @@
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 // import { NavigationContainer } from '@react-navigation/native';
 import {FontAwesome5} from '@expo/vector-icons';
 import{ Ionicons} from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 
@@ -107,25 +108,29 @@ const HelpStackScreen = () =>{
 
 //Tab Navigator
 
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 export default function Navigation (props) {
    console.log('navigation testing:', props.loggedInState)
+   const insets = useSafeAreaInsets();
+   
     return(
-  
-       
         <Tab.Navigator
         initialRouteName='TabCounter'
-        activeColor='#A0CE4E'
         screenOptions={{
-            showLabel: 'false',
-            activeTintColor: 'Black',
-
-        }}
-        
-         barStyle={{ backgroundColor: 'white',
-        
-         }}>
+            tabBarActiveTintColor: '#A0CE4E',
+            tabBarInactiveTintColor: 'rgba(0, 0, 0, 0.3)',
+            tabBarStyle: { 
+                backgroundColor: 'white',
+                height: 60 + insets.bottom,
+                paddingBottom: insets.bottom + 5,
+                paddingTop: 5
+            },
+            tabBarLabelStyle: {
+                fontSize: 12,
+                fontWeight: 'bold'
+            }
+        }}>
              
             <Tab.Screen name="TabCounter" 
             // component={counterStackScreen}
@@ -134,7 +139,7 @@ export default function Navigation (props) {
                 // tabBarColor:'pink',
                    tabBarLabel: 'Counter',
                  tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name='gauge' color={color} size={28} style={{ width: 30,  height: 30, marginTop: -3 }} />
+                  <MaterialCommunityIcons name='gauge' color={color} size={28} />
                   ),
                   }}
             />
@@ -145,7 +150,7 @@ export default function Navigation (props) {
                 // tabBarColor:'pink',
                    tabBarLabel: 'Profile',
                  tabBarIcon: ({ color }) => (
-                  <FontAwesome5 name='user-alt' color={color} size={28}  style={{ width: 30,  height: 30, marginTop: -3 }}/>
+                  <FontAwesome5 name='user-alt' color={color} size={28}/>
                   ),
                   }}
             />
@@ -155,7 +160,7 @@ export default function Navigation (props) {
                 // tabBarColor:'pink',
                    tabBarLabel: 'About',
                  tabBarIcon: ({ color }) => (
-                  <Ionicons name='information-circle-sharp' color={color} size={30} style={{ width: 30,  height: 30, marginTop: -3}}/>
+                  <Ionicons name='information-circle-sharp' color={color} size={30}/>
                   ),
                   }}
             />
@@ -166,7 +171,7 @@ export default function Navigation (props) {
                 // tabBarColor:'pink',
                    tabBarLabel: 'Help',
                  tabBarIcon: ({ color }) => (
-                  <Ionicons name='help-circle' color={color} size={32} style={{ width: 30, height: 30, marginTop: -5 }} />
+                  <Ionicons name='help-circle' color={color} size={32} />
                   ),
                   }}
             />

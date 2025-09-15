@@ -9,7 +9,6 @@ import ProgressBar from 'react-native-progress/Bar';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PopupBleModal from '../components/PopupBleModal';
 import ManuallyCounter from '../components/ManuallyCounter';
 import BleCounter from '../components/BleCounter';
 
@@ -257,7 +256,6 @@ export default function Counter(props) {
           </Card.Content>
           <ManuallyCounter visible={subscription} tallyLatestSteps={tallyLatestSteps} />
           {/* a pop-up modal to prompt the user to connect to a BLE device */}
-          <PopupBleModal setBleCharacteristic={setBleCharacteristic}/>
           <Text>BLE characteristic: {bleCharacteristic}</Text>
           {checkNewStep}
           <TouchableOpacity onPress={_unsubscribe} style={styles.cancelButton} >
