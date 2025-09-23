@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
 
-
+//The manual counter to add steps to help train AI
 const ManuallyCounter = (props) =>{
 
 const [newCouter, setNewCounter] = useState(0);
