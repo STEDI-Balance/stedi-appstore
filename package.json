@@ -10,7 +10,7 @@
     "@shopify/react-native-skia": "2.2.12",
     "babel-preset-expo": "^54.0.1",
     "cross-env": "^7.0.3",
-    "expo": "^54.0.0",
+    "expo": "^54.0.9",
     "expo-build-properties": "~1.0.8",
     "expo-dev-client": "~6.0.12",
     "expo-device": "~8.0.7",
@@ -34,7 +34,9 @@
     "react-native-vector-icons": "^8.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0"
+    "@babel/core": "^7.24.0",
+    "@types/react": "~19.1.10",
+    "typescript": "~5.9.2"
   },
   "scripts": {
     "build-ios-apple-devclient": "npx eas-cli build --profile development --platform ios",
