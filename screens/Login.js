@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";//react is a javascript library for user interfaces
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Button } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // with react-navigation I can change screens from one component to another easily
@@ -84,7 +84,9 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
           placeholder='Cell Phone'>
         </TextInput>
 
-
+        <TouchableOpacity  style={styles.signUpButton} onPress={() => navigation.navigate('SignUp')}>
+          <Text style={styles.signUpLink}>Don't have Account?</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.sendButton}
           onPress={()=>{
@@ -115,6 +117,7 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
           keyboardType='numeric'>
         </TextInput>
         {/* <View style={{...styles.allBody,flexDirection:"row"}}> */}
+        
         <TouchableOpacity
           style={styles.loginButton}
           onPress={()=>{setLoggedInState(loggedInStates.NOT_LOGGED_IN)}}       
@@ -164,7 +167,6 @@ const styles = StyleSheet.create({
     //  borderWidth: 1,
     padding: 10,
     borderRadius: 10,
-    marginBottom: 15,
   },
   margin: {
     marginTop: 100
@@ -187,7 +189,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#A0CE4E',
     padding: 10,
-    marginTop: 8,
     borderRadius: 10
   },
   title: {
@@ -207,8 +208,22 @@ const styles = StyleSheet.create({
     marginTop: 100,
     justifyContent: 'center'
   },
+  
   paragraph: {
     textAlign: 'center'
+  },
+  signUpButton: {
+    padding: 10,
+    alignItems: 'flex-end',
+    borderRadius: 5,
+  },
+  signUpLink: {
+    color: 'gray',
+    textAlign: 'left',
+    marginLeft: 0,
+    fontSize: 14,
+    marginTop: 2,
+    marginBottom: 2
   }
 
 })
