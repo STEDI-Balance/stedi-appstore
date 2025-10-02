@@ -4,6 +4,7 @@ import  Navigation from './components/Navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from './screens/OnboardingScreen';
 import Login from './screens/Login';
+import SignUp from './screens/SignUp';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -126,6 +127,8 @@ const App = () =>{
           <Stack.Screen name='Login' children={()=><Login loggedInStates={loggedInStates} loggedInState={loggedInState} setLoggedInState={setLoggedInState} setSessionToken={setSessionToken}/>}/>
           {/* If they have logged in, and seen the onboarding component, we show them the tabbed navigation component*/}  
           <Stack.Screen name='Navigation' children={()=><Navigation loggedInStates={loggedInStates} loggedInState={loggedInState} setLoggedInState={setLoggedInState} sessionToken={sessionToken}/>}/>
+          {/* If they request the SignUp page, we show the signup component */}
+          <Stack.Screen name='SignUp' component={SignUp}/>
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
