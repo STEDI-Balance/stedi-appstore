@@ -5,7 +5,7 @@ import { Checkbox } from "react-native-paper";
 import { Button } from "react-native-paper";
 import * as React from "react";
 
-export default function SignUp() {
+const SignUp = () => {
     //Consts
     const [checked, setChecked] = React.useState(false);
 
@@ -78,3 +78,5 @@ export default function SignUp() {
   </View>
   );
 }
+
+export default SignUp;

@@ -84,6 +84,15 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
           placeholder='Cell Phone'>
         </TextInput>
 
+        {/* Don't have an account? button */}
+        <TouchableOpacity
+          style={styles.link}
+          onPress={()=>{
+            navigation.replace('SignUp');
+          }}
+        >
+          <Text style={{ color: 'blue' }}>Don't have an account?</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.sendButton}
