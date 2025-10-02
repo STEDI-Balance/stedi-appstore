@@ -5,7 +5,7 @@ import { DatePickerModal } from "react-native-paper-dates";
 
 
 
-export function DatePicker({ label, value, onChange, placeholder }) {
+export function DatePicker({ label, value, onChange, placeholder, error }) {
   const [open, setOpen] = useState(false);
 
   const onDismissSingle = useCallback(() => {
@@ -29,6 +29,7 @@ export function DatePicker({ label, value, onChange, placeholder }) {
         label={label}
         mode="outlined"
         value={dateToString(value)}
+        error={error}
         right={
           <TextInput.Icon
             icon="calendar"

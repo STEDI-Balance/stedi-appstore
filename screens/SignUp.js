@@ -47,11 +47,95 @@ export default function SignUp() {
     height: "imperial",
     weight: "imperial",
   });
+  const [errors, setErrors] = useState({});
 
-  const onChangeFormValue = (key, value) => setForm({ ...form, [key]: value });
+  const onChangeFormValue = (key, value) => {
+    setForm({ ...form, [key]: value });
+    // Clear error when user starts typing
+    if (errors[key]) {
+      setErrors({ ...errors, [key]: null });
+    }
+  };
   const onChangeUnit = (key, value) => setUnit({ ...unit, [key]: value });
 
-  const onSubmit = useCallback(() => {});
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Email validation
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    // Birthday validation
+    if (!form.birthday) {
+      newErrors.birthday = "Birthday is required";
+    }
+
+    // Phone number validation
+    if (!form.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Phone number is required";
+    } else if (!/^\d{3}-\d{3}-\d{2}-\d{2}$/.test(form.phoneNumber)) {
+      newErrors.phoneNumber =
+        "Please enter a valid phone number (e.g. 385-123-45-89)";
+    }
+
+    // Password validation
+    if (!form.password) {
+      newErrors.password = "Password is required";
+    } else if (form.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long";
+    }
+
+    // Confirm password validation
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    // Gender validation
+    if (!form.gender) {
+      newErrors.gender = "Gender is required";
+    }
+
+    // Height and weight validation (if agree to share anonymous data is checked)
+    if (form.agreeAnonymous) {
+      if (form.heightDec === 0) {
+        newErrors.heightDec = "Height is required when sharing anonymous data";
+      }
+      if (form.weightDec === 0) {
+        newErrors.weightDec = "Weight is required when sharing anonymous data";
+      }
+    }
+
+    // Mandatory agreements validation
+    if (!form.agreeSMS) {
+      newErrors.agreeSMS = "SMS consent is mandatory";
+    }
+    if (!form.agreePrivacy) {
+      newErrors.agreePrivacy = "Privacy Policy agreement is mandatory";
+    }
+    if (!form.agreeTerms) {
+      newErrors.agreeTerms = "Terms of Use agreement is mandatory";
+    }
+    if (!form.agreeCookie) {
+      newErrors.agreeCookie = "Cookie Policy agreement is mandatory";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const onSubmit = useCallback(() => {
+    if (validateForm()) {
+      console.log("Form is valid, proceeding with submission");
+      // Handle form submission here
+    } else {
+      console.log("Form has errors");
+    }
+  }, [form]);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.allBody}>
@@ -77,52 +161,88 @@ export default function SignUp() {
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
         <ScrollView contentContainerStyle={styles.formContainer}>
           {/* Email */}
-          <TextInput
-            style={styles.input}
-            label="* Email"
-            mode="outlined"
-            value={form.email}
-            onChangeText={(text) => onChangeFormValue("email", text)}
-          />
+          <View>
+            <TextInput
+              style={styles.input}
+              label="* Email"
+              mode="outlined"
+              value={form.email}
+              onChangeText={(text) => onChangeFormValue("email", text)}
+              error={!!errors.email}
+            />
+            <HelperText type="error" visible={!!errors.email}>
+              {errors.email}
+            </HelperText>
+          </View>
 
-          <DatePicker
-            label="* Birthday"
-            value={form.birthday}
-            onChange={(date) => onChangeFormValue("birthday", date)}
-          />
+          <View>
+            <DatePicker
+              label="* Birthday"
+              value={form.birthday}
+              onChange={(date) => onChangeFormValue("birthday", date)}
+              error={!!errors.birthday}
+            />
+            <HelperText type="error" visible={!!errors.birthday}>
+              {errors.birthday}
+            </HelperText>
+          </View>
 
-          <TextInput
-            placeholder="e.g 385-123-45-89"
-            style={styles.phoneInput}
-            label="* Phone Number"
-            mode="outlined"
-            value={form.phoneNumber}
-            onChangeText={(text) => onChangeFormValue("phoneNumber", text)}
-          />
+          <View>
+            <TextInput
+              placeholder="e.g 385-123-45-89"
+              style={styles.phoneInput}
+              label="* Phone Number"
+              mode="outlined"
+              value={form.phoneNumber}
+              onChangeText={(text) => onChangeFormValue("phoneNumber", text)}
+              error={!!errors.phoneNumber}
+            />
+            <HelperText type="error" visible={!!errors.phoneNumber}>
+              {errors.phoneNumber}
+            </HelperText>
+          </View>
 
           {/* Password */}
-          <SecurityField
-            label="* Password"
-            value={form.password}
-            onChangeText={(value) => onChangeFormValue("password", value)}
-            placeholder
-          />
+          <View>
+            <SecurityField
+              label="* Password"
+              value={form.password}
+              onChangeText={(value) => onChangeFormValue("password", value)}
+              placeholder
+              error={!!errors.password}
+            />
+            <HelperText type="error" visible={!!errors.password}>
+              {errors.password}
+            </HelperText>
+          </View>
 
           {/* Confirm Password */}
-          <SecurityField
-            value={form.confirmPassword}
-            onChangeText={(value) =>
-              onChangeFormValue("confirmPassword", value)
-            }
-            label="* Confirm Password"
-          />
-          <Select
-            options={OPTIONS}
-            value={form.gender}
-            onSelect={(value) => onChangeFormValue("gender", value)}
-            label="* Gender"
-            placeholder="Select Gender"
-          />
+          <View>
+            <SecurityField
+              value={form.confirmPassword}
+              onChangeText={(value) =>
+                onChangeFormValue("confirmPassword", value)
+              }
+              label="* Confirm Password"
+              error={!!errors.confirmPassword}
+            />
+            <HelperText type="error" visible={!!errors.confirmPassword}>
+              {errors.confirmPassword}
+            </HelperText>
+          </View>
+          <View>
+            <Select
+              options={OPTIONS}
+              value={form.gender}
+              onSelect={(value) => onChangeFormValue("gender", value)}
+              label="* Gender"
+              placeholder="Select Gender"
+              error={!!errors.gender}
+            />
+            <HelperText type="error" visible={!!errors.gender}>
+              {errors.gender}
+            </HelperText>
+          </View>
           <Collapsible open={form.agreeAnonymous}>
             {/* Height */}
             <View>
@@ -199,6 +319,9 @@ export default function SignUp() {
                   }`}</Text>
                 </View>
               </View>
+              <HelperText type="error" visible={!!errors.heightDec}>
+                {errors.heightDec}
+              </HelperText>
             </View>
             <View>
               <View style={styles.units.unityHeader}>
@@ -278,6 +401,9 @@ export default function SignUp() {
                   }`}</Text>
                 </View>
               </View>
+              <HelperText type="error" visible={!!errors.weightDec}>
+                {errors.weightDec}
+              </HelperText>
             </View>
           </Collapsible>
           {/* Check box one */}
@@ -296,64 +422,84 @@ export default function SignUp() {
           </View>
 
           {/* Check box two */}
-          <View style={styles.checkboxContainer}>
-            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-              <Checkbox
-                style={styles.checkbox}
-                status={form.agreeSMS ? "checked" : "unchecked"}
-                onPress={() => {
-                  setForm({ ...form, agreeSMS: !form.agreeSMS });
-                }}
-              />
+          <View>
+            <View style={styles.checkboxContainer}>
+              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+                <Checkbox
+                  style={styles.checkbox}
+                  status={form.agreeSMS ? "checked" : "unchecked"}
+                  onPress={() => {
+                    onChangeFormValue("agreeSMS", !form.agreeSMS);
+                  }}
+                />
+              </View>
+              <Text style={styles.checkboxText}>
+                I consent to receiving text messages at the cell number I
+                provided (mandatory, must allow STOP opt-out)
+              </Text>
             </View>
-            <Text style={styles.checkboxText}>
-              I consent to receiving text messages at the cell number I provided
-              (mandatory, must allow STOP opt-out)
-            </Text>
+            <HelperText type="error" visible={!!errors.agreeSMS}>
+              {errors.agreeSMS}
+            </HelperText>
           </View>
           {/* Check box three */}
-          <View style={styles.checkboxContainer}>
-            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-              <Checkbox
-                style={styles.checkbox}
-                status={form.agreePrivacy ? "checked" : "unchecked"}
-                onPress={() => {
-                  setForm({ ...form, agreePrivacy: !form.agreePrivacy });
-                }}
-              />
+          <View>
+            <View style={styles.checkboxContainer}>
+              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+                <Checkbox
+                  style={styles.checkbox}
+                  status={form.agreePrivacy ? "checked" : "unchecked"}
+                  onPress={() => {
+                    onChangeFormValue("agreePrivacy", !form.agreePrivacy);
+                  }}
+                />
+              </View>
+              <Text style={styles.checkboxText}>
+                I have read and agree to the Privacy Policy (mandatory)
+              </Text>
             </View>
-            <Text style={styles.checkboxText}>
-              I have read and agree to the Privacy Policy (mandatory)
-            </Text>
+            <HelperText type="error" visible={!!errors.agreePrivacy}>
+              {errors.agreePrivacy}
+            </HelperText>
           </View>
           {/* Check box four */}
-          <View style={styles.checkboxContainer}>
-            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-              <Checkbox
-                style={styles.checkbox}
-                status={form.agreeTerms ? "checked" : "unchecked"}
-                onPress={() => {
-                  setForm({ ...form, agreeTerms: !form.agreeTerms });
-                }}
-              />
+          <View>
+            <View style={styles.checkboxContainer}>
+              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+                <Checkbox
+                  style={styles.checkbox}
+                  status={form.agreeTerms ? "checked" : "unchecked"}
+                  onPress={() => {
+                    onChangeFormValue("agreeTerms", !form.agreeTerms);
+                  }}
+                />
+              </View>
+              <Text style={styles.checkboxText}>
+                I have read and agree to the Terms of Use Policy (mandatory)
+              </Text>
             </View>
-            <Text style={styles.checkboxText}>
-              I have read and agree to the Terms of Use Policy (mandatory)
-            </Text>
+            <HelperText type="error" visible={!!errors.agreeTerms}>
+              {errors.agreeTerms}
+            </HelperText>
           </View>
-          <View style={styles.checkboxContainer}>
-            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-              <Checkbox
-                style={styles.checkbox}
-                status={form.agreeCookie ? "checked" : "unchecked"}
-                onPress={() => {
-                  setForm({ ...form, agreeCookie: !form.agreeCookie });
-                }}
-              />
+          <View>
+            <View style={styles.checkboxContainer}>
+              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+                <Checkbox
+                  style={styles.checkbox}
+                  status={form.agreeCookie ? "checked" : "unchecked"}
+                  onPress={() => {
+                    onChangeFormValue("agreeCookie", !form.agreeCookie);
+                  }}
+                />
+              </View>
+              <Text style={styles.checkboxText}>
+                I have read and agree to the Cookie Policy (mandatory)
+              </Text>
             </View>
-            <Text style={styles.checkboxText}>
-              I have read and agree to the Cookie Policy (mandatory)
-            </Text>
+            <HelperText type="error" visible={!!errors.agreeCookie}>
+              {errors.agreeCookie}
+            </HelperText>
           </View>
 
           {/* Spacer */}
@@ -362,7 +508,7 @@ export default function SignUp() {
           {/* Sign Up Button */}
           <Button
             mode="contained"
-            onPress={() => console.log("Pressed")}
+            onPress={onSubmit}
             style={{ ...styles.signUpButton, marginBottom: bottom }}
           >
             Sign Up
@@ -414,7 +560,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   formContainer: {
-    gap: 16, // Equal spacing between all child elements
+    gap: 4, // Equal spacing between all child elements
     paddingVertical: 20,
   },
   input: {

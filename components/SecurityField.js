@@ -8,6 +8,7 @@ export const SecurityField = ({
   label,
   showContent = false,
   styles,
+  error,
 }) => {
     const [show, setShow] = useState(showContent);
     const toggleShowContent = (field) => 
@@ -21,6 +22,7 @@ export const SecurityField = ({
       label={label}
       mode="outlined"
       secureTextEntry={!show}
+      error={error}
       right={
         <TextInput.Icon
           onPress={() => toggleShowContent("confirmPassword")}

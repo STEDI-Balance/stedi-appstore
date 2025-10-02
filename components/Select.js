@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
-export const Select = ({ options, value, onSelect, label, placeholder }) => {
+export const Select = ({ options, value, onSelect, label, placeholder, error }) => {
   return (
     <Dropdown
       label={label}
@@ -9,6 +9,7 @@ export const Select = ({ options, value, onSelect, label, placeholder }) => {
       options={options}
       value={value}
       onSelect={onSelect}
+      error={error}
     />
   );
 };
