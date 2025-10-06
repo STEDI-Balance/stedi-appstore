@@ -153,9 +153,6 @@ export default function SignUp() {
       const selectedCountry = countries.find(c => c.code === form.countryCode);
       const countryNumber = selectedCountry?.number || '';
       
-      // Format phone number - remove formatting and combine with country code
-      const cleanPhoneNumber = form.phoneNumber.replace(/\D+/g, "");
-      const fullPhone = cleanPhoneNumber;
       
       // Format birthday to YYYY-MM-DD format
       const formattedBirthday = form.birthday 
@@ -164,17 +161,21 @@ export default function SignUp() {
 
       const currentTimestamp = new Date().getTime();
 
+      const formattedPhone = form.phoneNumber.replace(/\D+/g, "")
+
       const userData = {
         userName: form.email,
         email: form.email,
         password: form.password,
-        phone: fullPhone,
+        phone: formattedPhone,
         birthDate: formattedBirthday,
         verifyPassword: form.confirmPassword,
         agreedToTermsOfUseDate: currentTimestamp,
         agreedToCookiePolicyDate: currentTimestamp,
         agreedToPrivacyPolicyDate: currentTimestamp,
         agreedToTextMessageDate: currentTimestamp,
+        region: selectedCountry?.code || '',
+        whatsAppPhone: formattedPhone
       };
 
       const response = await fetch('https://dev.stedi.me/user', {
