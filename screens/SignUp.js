@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
+  Alert,
 } from "react-native";
 import { Text } from "react-native-paper";
 import { TextInput } from "react-native-paper";
@@ -22,13 +23,16 @@ import { Collapsible } from "../components/Collapsible";
 import { useNavigation } from "@react-navigation/native";
 import { Slider } from "../components/Slider";
 import { SecurityField } from "../components/SecurityField";
+import { countries } from "../utils/Constants";
 
 export default function SignUp() {
   const { bottom } = useSafeAreaInsets();
   const navigation = useNavigation();
   const [form, setForm] = useState({
+    name: "",
     email: "",
     birthday: "",
+    countryCode: "",
     phoneNumber: "",
     password: "",
     confirmPassword: "",
@@ -48,6 +52,7 @@ export default function SignUp() {
     weight: "imperial",
   });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const onChangeFormValue = (key, value) => {
     setForm({ ...form, [key]: value });
@@ -58,8 +63,16 @@ export default function SignUp() {
   };
   const onChangeUnit = (key, value) => setUnit({ ...unit, [key]: value });
 
+
   const validateForm = () => {
     const newErrors = {};
+
+    // Name validation
+    if (!form.name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (form.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters long";
+    }
 
     // Email validation
     if (!form.email.trim()) {
@@ -72,6 +85,12 @@ export default function SignUp() {
     if (!form.birthday) {
       newErrors.birthday = "Birthday is required";
     }
+
+    // Country code validation
+    if (!form.countryCode.trim()) {
+      newErrors.countryCode = "Country code is required";
+    }
+
 
     // Phone number validation
     if (!form.phoneNumber.trim()) {
@@ -128,14 +147,149 @@ export default function SignUp() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const onSubmit = useCallback(() => {
+  const createUser = async () => {
+    try {
+      // Get the country phone number from the country code
+      const selectedCountry = countries.find(c => c.code === form.countryCode);
+      const countryNumber = selectedCountry?.number || '';
+      
+      // Format phone number - remove formatting and combine with country code
+      const cleanPhoneNumber = form.phoneNumber.replace(/\D+/g, "");
+      const fullPhone = cleanPhoneNumber;
+      
+      // Format birthday to YYYY-MM-DD format
+      const formattedBirthday = form.birthday 
+        ? new Date(form.birthday).toISOString().split('T')[0]
+        : '';
+
+      const currentTimestamp = new Date().getTime();
+
+      const userData = {
+        userName: form.email,
+        email: form.email,
+        password: form.password,
+        phone: fullPhone,
+        birthDate: formattedBirthday,
+        verifyPassword: form.confirmPassword,
+        agreedToTermsOfUseDate: currentTimestamp,
+        agreedToCookiePolicyDate: currentTimestamp,
+        agreedToPrivacyPolicyDate: currentTimestamp,
+        agreedToTextMessageDate: currentTimestamp,
+      };
+
+      const response = await fetch('https://dev.stedi.me/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          throw new Error("Email or cell # has already been previously registered");
+        } else {
+          throw new Error("Error creating account. Please confirm password is at least 6 characters, has an upper case letter, a lower case letter, a number, and a symbol.");
+        }
+      }
+
+      // The response text is the login token
+      return responseText;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const createCustomer = async (loginToken) => {
+    try {
+      // Get the country code name for region
+      const selectedCountry = countries.find(c => c.code === form.countryCode);
+      const region = selectedCountry?.code || '';
+      
+      // Format phone number
+      const cleanPhoneNumber = form.phoneNumber.replace(/\D+/g, "");
+      const fullPhone = cleanPhoneNumber;
+      
+      // Format birthday to YYYY-MM-DD format
+      const formattedBirthday = form.birthday 
+        ? new Date(form.birthday).toISOString().split('T')[0]
+        : '';
+
+      const customerData = {
+        customerName: form.name.trim(), // Use the name from the form
+        email: form.email,
+        phone: fullPhone,
+        whatsAppPhone: fullPhone,
+        birthDay: formattedBirthday,
+        region: region,
+        gender: form.gender || "Male",
+      };
+
+      const response = await fetch('https://dev.stedi.me/customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'suresteps.session.token': loginToken,
+        },
+        body: JSON.stringify(customerData),
+      });
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          throw new Error("Email or cell # has already been previously registered");
+        } else {
+          throw new Error("Error creating account. Please confirm information is correct.");
+        }
+      }
+
+      const responseText = await response.text();
+      return responseText;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const onSubmit = useCallback(async () => {
     if (validateForm()) {
-      console.log("Form is valid, proceeding with submission");
-      // Handle form submission here
+      setIsLoading(true);
+      try {
+        // First create the user
+        const loginToken = await createUser();
+        
+        // Then create the customer with the login token
+        await createCustomer(loginToken);
+        
+        // Success - show alert and navigate to login
+        Alert.alert(
+          "Success",
+          "Successfully created user, please login to get started.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Login")
+            }
+          ]
+        );
+      } catch (error) {
+        // Show error alert
+        Alert.alert(
+          "Error",
+          error.message || "An error occurred while creating your account. Please try again.",
+          [{ text: "OK" }]
+        );
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       console.log("Form has errors");
+      console.log({ errors });
     }
-  }, [form]);
+  }, [form, navigation]);
+
+  console.log({errors})
+
 
   return (
     <SafeAreaView edges={["top"]} style={styles.allBody}>
@@ -164,6 +318,19 @@ export default function SignUp() {
           <View>
             <TextInput
               style={styles.input}
+              label="* Name"
+              mode="outlined"
+              value={form.name}
+              onChangeText={(text) => onChangeFormValue("name", text)}
+              error={!!errors.name}
+            />
+            <HelperText type="error" visible={!!errors.name}>
+              {errors.name}
+            </HelperText>
+          </View>
+          <View>
+            <TextInput
+              style={styles.input}
               label="* Email"
               mode="outlined"
               value={form.email}
@@ -184,6 +351,20 @@ export default function SignUp() {
             />
             <HelperText type="error" visible={!!errors.birthday}>
               {errors.birthday}
+            </HelperText>
+          </View>
+
+          <View>
+            <Select
+              options={phoneCodes}
+              value={form.countryCode}
+              onSelect={(value) => onChangeFormValue('countryCode', value)}
+              label="* Country Code"
+              placeholder="Select Country Code"
+              error={!!errors.gender}
+            />
+            <HelperText type="error" visible={!!errors.gender}>
+              {errors.gender}
             </HelperText>
           </View>
 
@@ -232,7 +413,7 @@ export default function SignUp() {
           </View>
           <View>
             <Select
-              options={OPTIONS}
+              options={genderOptions}
               value={form.gender}
               onSelect={(value) => onChangeFormValue("gender", value)}
               label="* Gender"
@@ -510,8 +691,10 @@ export default function SignUp() {
             mode="contained"
             onPress={onSubmit}
             style={{ ...styles.signUpButton, marginBottom: bottom }}
+            loading={isLoading}
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? "Creating Account..." : "Sign Up"}
           </Button>
         </ScrollView>
       </ScrollView>
@@ -626,7 +809,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const OPTIONS = [
+const genderOptions = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
 ];
+
+
+  const phoneCodes = countries?.map((country) => ({
+    label: country.name,
+    value: country.code,
+  })) || [];
