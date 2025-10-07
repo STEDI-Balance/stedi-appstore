@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignUp from './screens/SignUp';
 import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
 import { customTheme } from "./utils/Constants";
+import { UserContextProvider } from './utils/Context';
 
 
 
@@ -27,6 +28,7 @@ const App = () => {
     loggedInStates.NOT_LOGGED_IN
   );
   const [sessionToken, setSessionToken] = React.useState("");
+  const [userName, setUserName] = React.useState("");
   const [onBoarded, setOnBoarded] = React.useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onBoardedRef = useRef(false);
@@ -55,7 +57,9 @@ const App = () => {
       onBoardedRef.current = "true" == getOnBoarded;
       console.log("onBoarded:", getOnBoarded);
       const sessionToken = await AsyncStorage.getItem("sessionToken");
+      const storedUserName = await AsyncStorage.getItem("userName");
       console.log("sessionToken", sessionToken);
+      console.log("userName", storedUserName);
 
       if (sessionToken) {
         const validateResponse = await fetch(
@@ -72,8 +76,12 @@ const App = () => {
           //we know it is a good non-expired token
           const userName = await validateResponse.text();
           await AsyncStorage.setItem("userName", userName); //save user name for later
+          setUserName(userName); // Set userName state
           setLoggedInState(loggedInStates.LOGGED_IN);
         }
+      } else if (storedUserName) {
+        // If we have a stored userName but no session token, set it anyway
+        setUserName(storedUserName);
       }
       console.log("app.js login:", loggedInState);
       let initialRouteName =
@@ -126,6 +134,7 @@ const App = () => {
     //     devices={allDevices}
     //   />
     // </SafeAreaView>
+    <UserContextProvider sessionToken={sessionToken} userName={userName}>
     <PaperProvider theme={customTheme}>
       <SafeAreaProvider>
         <NavigationContainer>
@@ -152,6 +161,7 @@ const App = () => {
                   loggedInState={loggedInState}
                   setLoggedInState={setLoggedInState}
                   setSessionToken={setSessionToken}
+                  setUserName={setUserName}
                 />
               )}
             />
@@ -171,7 +181,8 @@ const App = () => {
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
-    </PaperProvider>
+      </PaperProvider>
+      </UserContextProvider>
   );
 };
 

@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // with react-navigation I can change screens from one component to another easily
 import { useNavigation } from '@react-navigation/native';//this is another react hook
 
-const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
+const Login = ({ loggedInState, loggedInStates, setLoggedInState, setSessionToken, setUserName }) => {
   const navigation = useNavigation();
   const [form, setForm] = React.useState({
     phoneNumber: "",
@@ -50,9 +50,14 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
         "https://dev.stedi.me/validate/" + sessionToken
       );
       const userName = await userNameResponse.text();
-      console.log("sessionToken in Login Button", sessionToken);
+
       await AsyncStorage.setItem("sessionToken", sessionToken); //local storage
       await AsyncStorage.setItem("userName", userName);
+      
+      // Update the App.js state with session token and userName
+      if (setSessionToken) setSessionToken(sessionToken);
+      if (setUserName) setUserName(userName);
+      
       //   setLoggedInState(loggedInStates.LOGGED_IN);
       navigation.replace("Navigation");
     } else {
@@ -159,11 +164,13 @@ const styles = StyleSheet.create({
   allBody: {
     marginTop: 150,
     marginLeft: 20,
-    marginRight: 20
+    marginRight: 20,
+    gap: 10
   },
   input: {
     height: 45,
     marginTop: 25,
+    marginBottom: 25,
     //  borderWidth: 1,
     padding: 10,
     borderRadius: 10,
