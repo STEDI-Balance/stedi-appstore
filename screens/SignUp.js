@@ -362,10 +362,10 @@ export default function SignUp() {
               onSelect={(value) => onChangeFormValue('countryCode', value)}
               label="* Country Code"
               placeholder="Select Country Code"
-              error={!!errors.gender}
+              error={!!errors.countryCode}
             />
-            <HelperText type="error" visible={!!errors.gender}>
-              {errors.gender}
+            <HelperText type="error" visible={!!errors.countryCode}>
+              {errors.countryCode}
             </HelperText>
           </View>
 
