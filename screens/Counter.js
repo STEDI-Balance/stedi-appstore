@@ -11,7 +11,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ManuallyCounter from '../components/ManuallyCounter';
 import BleCounter from '../components/BleCounter';
-// Default constructer for the Counter screen.
+import DeviceSetupOnboarding from '../components/DeviceSetupOnboarding'; // ADDED
+
 export default function Counter(props) {
   const [completionCount, setCompletionCount] = useState(0);
   const [counter, setCounter] = useState(180); //(180 seconds = 3 minutes)
@@ -19,7 +20,9 @@ export default function Counter(props) {
   const [currentScreen, setCurrentScreen] = useState('counter');
   const [shareToken, setShareToken] = useState("");
   const [bleCharacteristic, setBleCharacteristic] = useState(0); // variable to keep track of what the BLE device is measuring
-//Loads Username and token on mount.
+
+  const [showOnboarding, setShowOnboarding] = useState(true); // ADDED
+
   useEffect(() => {
     const getUserName = async () => {
       userName.current = await AsyncStorage.getItem('userName');
@@ -249,6 +252,14 @@ export default function Counter(props) {
   if (currentScreen === 'counter') {// Styles for Counter screen and functionality behind buttons.
     return (
       <View style={styles.screen}>
+        {/* ADDED: show onboarding modal over the Counter */}
+        {showOnboarding && (
+          <DeviceSetupOnboarding
+            visible={showOnboarding}
+            onFinish={() => setShowOnboarding(false)}
+          />
+        )}
+
         <Card style={styles.card}>
           <Card.Content>
             <Title style={styles.titleText}>Steps</Title>
