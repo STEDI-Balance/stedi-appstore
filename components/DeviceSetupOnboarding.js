@@ -9,7 +9,7 @@ import {
   Image,
   ScrollView
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Onboarding from "react-native-onboarding-swiper";
 
 export default function DeviceSetupOnboarding({
@@ -129,6 +129,7 @@ export default function DeviceSetupOnboarding({
 
   return (
     <Modal visible={visible} animationType="fade" transparent={false}>
+      <SafeAreaProvider>
       <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
         <Onboarding
           testID="onboarding-component"
@@ -151,7 +152,8 @@ export default function DeviceSetupOnboarding({
           controlStatusBar
           showSkip
         />
-      </SafeAreaView>
+        </SafeAreaView>
+        </SafeAreaProvider>
     </Modal>
   );
 }

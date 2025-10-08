@@ -10,7 +10,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignUp from './screens/SignUp';
 import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
 import { customTheme } from "./utils/Constants";
-import { UserContextProvider } from './utils/Context';
+import { UserContextProvider } from './utils/context';
+
 
 
 
