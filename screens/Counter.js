@@ -33,7 +33,7 @@ export default function Counter(props) {
     };
     getUserName();
   }, []);
-
+// Decides where to navigate after completing a set. Either to the result screen or the take a break screen
   useEffect(() => {
     const redirect = async () => {
       if (currentScreen === 'counter') {
@@ -49,7 +49,7 @@ export default function Counter(props) {
     }
     redirect();
   }, [completionCount]);
-
+// Break screen timer. Ticks down.
   useEffect(() => {
     counter > 0 && setTimeout(() => {
       if (currentScreen === 'break') {
@@ -61,7 +61,7 @@ export default function Counter(props) {
       }
     }, 1000);
   }, [counter, currentScreen]);
-
+// Converts time to show as HH:MM:SS
   const clockify = () => {
     let hours = Math.floor(counter / 60 / 60);
     let minutes = Math.floor(counter / 60 % 60);
@@ -76,14 +76,14 @@ export default function Counter(props) {
       displaySeconds,
     };
   };
-
+// ======== REFS (mutable values that persist across renders, not causing re-renders when changed) ========
   const customer = useRef();
   const startTime = useRef(0);
   const stopTime = useRef(0);
   const testTime = useRef(0);
   const token = useRef("");
   const userName = useRef("");
-
+// Saves steps and records time to prepare to add to backend.
   const savingSteps = async (event) => {
     let stepPoints = [];
     const lastStep = steps.current[29];
@@ -98,9 +98,9 @@ export default function Counter(props) {
     steps.current.forEach(stepObject => {
       const stepTime = stepObject.time - previousTime;
       previousTime = stepObject.time;
-      stepPoints.push(stepTime);
+      stepPoints.push(stepTime); ; // Adds data to the array for backend
     });
-
+// Gets the results and attempts to push the data to the backend
     try {
       console.log('token:', token.current);
       await fetch('https://dev.stedi.me/rapidsteptest', {
@@ -123,7 +123,7 @@ export default function Counter(props) {
       console.log('save error', error);
     }
   }
-
+//Shows results from the backend.
   const getResults = async () => {
     try {
       console.log('UserName:' + userName.current);
@@ -146,7 +146,7 @@ export default function Counter(props) {
       console.log('score error', error);
     }
   }
-
+// After getting the score from backend displays a message depending on score.
   const outcome = () => {
     if (score >= 10) {
       return ("Excellent improvement")
@@ -174,7 +174,7 @@ export default function Counter(props) {
       return ("make a comeback through regular exercise.*")
     }
   }
-
+// Reset set and prepare for new one
   const close = () => {
     setCompletionCount(0);
     setCurrentScreen('counter');
@@ -182,7 +182,7 @@ export default function Counter(props) {
     setCounter(180);
   }
 
-  const shareProgress = async () => {
+  const shareProgress = async () => {// Share progress functionallity. Currently not fully implemented.  (From what I can tell lol)
     const shareOptions = {
       message: 'This is a test'
     }
@@ -207,7 +207,7 @@ export default function Counter(props) {
   const [stepCount, setStepCount] = useState(0);
   let stepDone = useRef(true); //variable used with the BleCounter component to keep track of whether a step has been completed.
 
-  const _subscribe = () => {
+  const _subscribe = () => {// begins a set basically.
     setSubscription(true)
     startTime.current = new Date().getTime();
     setStepCount(0);
@@ -215,7 +215,7 @@ export default function Counter(props) {
     steps.current = [];
   };
 
-  const tallyLatestSteps = async () => {
+  const tallyLatestSteps = async () => {// gets the data and sends everything depending on if you are at 30 steps
     steps.current = steps.current.concat([{ time: new Date().getTime() }]);
     if (steps.current.length >= 30) {
       setStepCount(0);
@@ -228,7 +228,7 @@ export default function Counter(props) {
     }
   }
 
-  const _unsubscribe = () => {
+  const _unsubscribe = () => {// resets flags
     subscription && setSubscription(false);
     setSubscription(null);
   };
@@ -249,7 +249,7 @@ export default function Counter(props) {
   const { x, y, z } = data.current;
   let total_amount_xyz = Math.sqrt(x * x + y * y + z * z) * 9.81;
 
-  if (currentScreen === 'counter') {
+  if (currentScreen === 'counter') {// Styles for Counter screen and functionality behind buttons.
     return (
       <View style={styles.screen}>
         {/* ADDED: show onboarding modal over the Counter */}
@@ -284,7 +284,7 @@ export default function Counter(props) {
     );
   }
 
-  else if (currentScreen === 'break') {
+  else if (currentScreen === 'break') {// Break screen functionality and display.
     const { displayHours, displayMinutes, displaySeconds } = clockify();
 
     return (
@@ -300,7 +300,7 @@ export default function Counter(props) {
     );
   }
 
-  else if (currentScreen === 'result') {
+  else if (currentScreen === 'result') { //result screen functionality and display
     return (
       <View style={styles.screen}>
         <Card style={styles.card}>
@@ -341,7 +341,7 @@ export default function Counter(props) {
     );
   }
 }
-
+//Styles
 const styles = StyleSheet.create({
   screen: {
     flex: 1,

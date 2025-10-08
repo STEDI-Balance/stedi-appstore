@@ -7,33 +7,41 @@ import Login from './screens/Login';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SignUp from './screens/SignUp';
+import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
+import { customTheme } from "./utils/Constants";
+import { UserContextProvider } from './utils/Context';
+
+
 
 const Stack = createNativeStackNavigator();
 
-const loggedInStates={
-  NOT_LOGGED_IN:'NOT_LOGGED_IN',
-  LOGGED_IN:'LOGGED_IN',
-  LOGGING_IN:'LOGGING_IN'
-}
+const loggedInStates = {
+  NOT_LOGGED_IN: "NOT_LOGGED_IN",
+  LOGGED_IN: "LOGGED_IN",
+  LOGGING_IN: "LOGGING_IN",
+};
 
-const App = () =>{
+const App = () => {
   const [isFirstLaunch, setFirstLaunch] = React.useState(true);
-  const [loggedInState, setLoggedInState] = React.useState(loggedInStates.NOT_LOGGED_IN);
+  const [loggedInState, setLoggedInState] = React.useState(
+    loggedInStates.NOT_LOGGED_IN
+  );
   const [sessionToken, setSessionToken] = React.useState("");
-  const [onBoarded,setOnBoarded] = React.useState(false);
+  const [userName, setUserName] = React.useState("");
+  const [onBoarded, setOnBoarded] = React.useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onBoardedRef = useRef(false);
 
   const scanForDevices = async () => {
-    
     const isPermissionsEnabled = await requestPermissions();
-    console.log('Permission Enabled after requesting: '+isPermissionsEnabled);
+    console.log("Permission Enabled after requesting: " + isPermissionsEnabled);
     if (isPermissionsEnabled) {
       scanForPeripherals();
     }
   };
 
-    const hideModal = () => {
+  const hideModal = () => {
     setIsModalVisible(false);
   };
 
@@ -42,53 +50,62 @@ const App = () =>{
     setIsModalVisible(true);
   };
 
-  useEffect(()=>{
-
-  
-
-    const getSessionToken = async()=>{
-      const getOnBoarded = await AsyncStorage.getItem('onBoarded');
-      setOnBoarded(getOnBoarded=='true');
-      onBoardedRef.current='true'==getOnBoarded;
+  useEffect(() => {
+    const getSessionToken = async () => {
+      const getOnBoarded = await AsyncStorage.getItem("onBoarded");
+      setOnBoarded(getOnBoarded == "true");
+      onBoardedRef.current = "true" == getOnBoarded;
       console.log("onBoarded:", getOnBoarded);
-      const sessionToken =  await AsyncStorage.getItem('sessionToken');
-      console.log('sessionToken',sessionToken);
-      
-      if(sessionToken){
-        const validateResponse = await fetch('https://dev.stedi.me/validate/'+sessionToken,
-        {
-          method:'GET',
-          headers:{
-            'content-type':'application/text'
+      const sessionToken = await AsyncStorage.getItem("sessionToken");
+      const storedUserName = await AsyncStorage.getItem("userName");
+      console.log("sessionToken", sessionToken);
+      console.log("userName", storedUserName);
+
+      if (sessionToken) {
+        const validateResponse = await fetch(
+          "https://dev.stedi.me/validate/" + sessionToken,
+          {
+            method: "GET",
+            headers: {
+              "content-type": "application/text",
+            },
           }
-        }    
-        );    
-    
-        if(validateResponse.status==200){//we know it is a good non-expired token
+        );
+
+        if (validateResponse.status == 200) {
+          //we know it is a good non-expired token
           const userName = await validateResponse.text();
-          await AsyncStorage.setItem('userName',userName);//save user name for later
+          await AsyncStorage.setItem("userName", userName); //save user name for later
+          setUserName(userName); // Set userName state
           setLoggedInState(loggedInStates.LOGGED_IN);
         }
+      } else if (storedUserName) {
+        // If we have a stored userName but no session token, set it anyway
+        setUserName(storedUserName);
       }
-      console.log('app.js login:',loggedInState)
-      let initialRouteName=onBoardedRef.current !=true ? 'Onboarding' : (loggedInState==loggedInStates.LOGGED_IN ? 'Navigation' : 'Login')
-      console.log('initialRouteName: '+initialRouteName);
-      console.log('onBoardedRef.current:'+onBoardedRef.current);
-        // if(getOnBoarded != 'true'){
-        //     navigation.replace('Onboarding')
-        //   }else if (loggedInState==loggedInStates.LOGGED_IN){
-        //       navigation.replace('Navigation')
-        //   }else if(loggedInState==loggedInStates.NOT_LOGGED_IN){
-        //       console.log('going to login screen:',loggedInState)
-        //       // navigation.replace('Login')
-        //   }      
-    }
-    
-    getSessionToken();
-  
-  },[]); 
+      console.log("app.js login:", loggedInState);
+      let initialRouteName =
+        onBoardedRef.current != true
+          ? "Onboarding"
+          : loggedInState == loggedInStates.LOGGED_IN
+          ? "Navigation"
+          : "Login";
+      console.log("initialRouteName: " + initialRouteName);
+      console.log("onBoardedRef.current:" + onBoardedRef.current);
+      // if(getOnBoarded != 'true'){
+      //     navigation.replace('Onboarding')
+      //   }else if (loggedInState==loggedInStates.LOGGED_IN){
+      //       navigation.replace('Navigation')
+      //   }else if(loggedInState==loggedInStates.NOT_LOGGED_IN){
+      //       console.log('going to login screen:',loggedInState)
+      //       // navigation.replace('Login')
+      //   }
+    };
 
-  return(
+    getSessionToken();
+  }, []);
+
+  return (
     // <SafeAreaView style={styles.container}>
     //   <View style={styles.heartRateTitleWrapper}>
     //     {connectedDevice ? (
@@ -101,7 +118,7 @@ const App = () =>{
     //         Please Connect to a Heart Rate Monitor
     //       </Text>
     //     )}
-    //   </View>      
+    //   </View>
     //   <TouchableOpacity
     //     onPress={connectedDevice ? disconnectFromDevice : openModal}
     //     style={styles.ctaButton}
@@ -115,22 +132,59 @@ const App = () =>{
     //     visible={isModalVisible}
     //     connectToPeripheral={connectToDevice}
     //     devices={allDevices}
-    //   />      
+    //   />
     // </SafeAreaView>
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{headerShown:false}}>
-          {/* We only show the Onboarding component the first time they run the app*/}
-          {onBoarded ? null : (<Stack.Screen name='Onboarding' children={()=><OnboardingScreen setFirstLaunch={setFirstLaunch} loggedInStates={loggedInStates} loggedInState={loggedInState}/>}/>)}
-          {/* We  show the login component if they don't have a valid login token already stored in the app*/}        
-          <Stack.Screen name='Login' children={()=><Login loggedInStates={loggedInStates} loggedInState={loggedInState} setLoggedInState={setLoggedInState} setSessionToken={setSessionToken}/>}/>
-          {/* If they have logged in, and seen the onboarding component, we show them the tabbed navigation component*/}  
-          <Stack.Screen name='Navigation' children={()=><Navigation loggedInStates={loggedInStates} loggedInState={loggedInState} setLoggedInState={setLoggedInState} sessionToken={sessionToken}/>}/>
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
-  )
-}
+    <UserContextProvider sessionToken={sessionToken} userName={userName}>
+    <PaperProvider theme={customTheme}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {/* We only show the Onboarding component the first time they run the app*/}
+            {onBoarded ? null : (
+              <Stack.Screen
+                name="Onboarding"
+                children={() => (
+                  <OnboardingScreen
+                    setFirstLaunch={setFirstLaunch}
+                    loggedInStates={loggedInStates}
+                    loggedInState={loggedInState}
+                  />
+                )}
+              />
+            )}
+            {/* We  show the login component if they don't have a valid login token already stored in the app*/}
+            <Stack.Screen
+              name="Login"
+              children={() => (
+                <Login
+                  loggedInStates={loggedInStates}
+                  loggedInState={loggedInState}
+                  setLoggedInState={setLoggedInState}
+                  setSessionToken={setSessionToken}
+                  setUserName={setUserName}
+                />
+              )}
+            />
+            <Stack.Screen name="SignUp" children={() => <SignUp />} />
+            {/* If they have logged in, and seen the onboarding component, we show them the tabbed navigation component*/}
+            <Stack.Screen
+              name="Navigation"
+              children={() => (
+                <Navigation
+                  loggedInStates={loggedInStates}
+                  loggedInState={loggedInState}
+                  setLoggedInState={setLoggedInState}
+                  sessionToken={sessionToken}
+                />
+              )}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+      </PaperProvider>
+      </UserContextProvider>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
