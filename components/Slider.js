@@ -2,7 +2,10 @@ import { StyleSheet } from "react-native";
 import ReactNativeSlider from "@react-native-community/slider";
 import { customTheme } from "../utils/Constants";
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 export const Slider = ({ value, onSlidingComplete, min, max, step }) => {
   return (
     <ReactNativeSlider

@@ -22,9 +22,18 @@ const loggedInStates = {
   LOGGED_IN: "LOGGED_IN",
   LOGGING_IN: "LOGGING_IN",
 };
+const loggedInStates = {
+  NOT_LOGGED_IN: "NOT_LOGGED_IN",
+  LOGGED_IN: "LOGGED_IN",
+  LOGGING_IN: "LOGGING_IN",
+};
 
 const App = () => {
+const App = () => {
   const [isFirstLaunch, setFirstLaunch] = React.useState(true);
+  const [loggedInState, setLoggedInState] = React.useState(
+    loggedInStates.NOT_LOGGED_IN
+  );
   const [loggedInState, setLoggedInState] = React.useState(
     loggedInStates.NOT_LOGGED_IN
   );
@@ -37,11 +46,13 @@ const App = () => {
   const scanForDevices = async () => {
     const isPermissionsEnabled = await requestPermissions();
     console.log("Permission Enabled after requesting: " + isPermissionsEnabled);
+    console.log("Permission Enabled after requesting: " + isPermissionsEnabled);
     if (isPermissionsEnabled) {
       scanForPeripherals();
     }
   };
 
+  const hideModal = () => {
   const hideModal = () => {
     setIsModalVisible(false);
   };
@@ -51,6 +62,11 @@ const App = () => {
     setIsModalVisible(true);
   };
 
+  useEffect(() => {
+    const getSessionToken = async () => {
+      const getOnBoarded = await AsyncStorage.getItem("onBoarded");
+      setOnBoarded(getOnBoarded == "true");
+      onBoardedRef.current = "true" == getOnBoarded;
   useEffect(() => {
     const getSessionToken = async () => {
       const getOnBoarded = await AsyncStorage.getItem("onBoarded");
@@ -104,7 +120,29 @@ const App = () => {
       //   }
     };
 
+      console.log("app.js login:", loggedInState);
+      let initialRouteName =
+        onBoardedRef.current != true
+          ? "Onboarding"
+          : loggedInState == loggedInStates.LOGGED_IN
+          ? "Navigation"
+          : "Login";
+      console.log("initialRouteName: " + initialRouteName);
+      console.log("onBoardedRef.current:" + onBoardedRef.current);
+      // if(getOnBoarded != 'true'){
+      //     navigation.replace('Onboarding')
+      //   }else if (loggedInState==loggedInStates.LOGGED_IN){
+      //       navigation.replace('Navigation')
+      //   }else if(loggedInState==loggedInStates.NOT_LOGGED_IN){
+      //       console.log('going to login screen:',loggedInState)
+      //       // navigation.replace('Login')
+      //   }
+    };
+
     getSessionToken();
+  }, []);
+
+  return (
   }, []);
 
   return (
@@ -121,6 +159,7 @@ const App = () => {
     //       </Text>
     //     )}
     //   </View>
+    //   </View>
     //   <TouchableOpacity
     //     onPress={connectedDevice ? disconnectFromDevice : openModal}
     //     style={styles.ctaButton}
@@ -134,6 +173,7 @@ const App = () => {
     //     visible={isModalVisible}
     //     connectToPeripheral={connectToDevice}
     //     devices={allDevices}
+    //   />
     //   />
     // </SafeAreaView>
     <UserContextProvider sessionToken={sessionToken} userName={userName}>
