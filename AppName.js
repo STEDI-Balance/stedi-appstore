@@ -5,9 +5,7 @@ import logo from './image/logo.png';
 function AppName() {
     return (
       <View style={styles.appName}>
-        <Image
-         style={{ width:240, height: 40 }}
-          source={logo}/>
+        <Image style={{ width: 240, height: 40 }} source={logo} />
       </View>
     );
   }
