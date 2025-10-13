@@ -6,10 +6,19 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Text } from "react-native-paper";
-import { TextInput } from "react-native-paper";
-import { Checkbox } from "react-native-paper";
-import { Button, HelperText } from "react-native-paper";
+import { DatePicker } from "../components/DatePicker";
+import { Collapsible } from "../components/Collapsible";
+import { useNavigation } from "@react-navigation/native";
+import { Slider } from "../components/Slider";
+import { SecurityField } from "../components/SecurityField";
+import { countries } from "../utils/Constants";
+import {
+  Button,
+  HelperText,
+  Checkbox,
+  TextInput,
+  Text,
+} from "react-native-paper";
 import React, { useState, useCallback } from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
 import {
@@ -18,12 +27,6 @@ import {
 } from "react-native-safe-area-context";
 
 import { Select } from "../components/Select";
-import { DatePicker } from "../components/DatePicker";
-import { Collapsible } from "../components/Collapsible";
-import { useNavigation } from "@react-navigation/native";
-import { Slider } from "../components/Slider";
-import { SecurityField } from "../components/SecurityField";
-import { countries } from "../utils/Constants";
 
 export default function SignUp() {
   const { bottom } = useSafeAreaInsets();
@@ -63,7 +66,6 @@ export default function SignUp() {
   };
   const onChangeUnit = (key, value) => setUnit({ ...unit, [key]: value });
 
-
   const validateForm = () => {
     const newErrors = {};
 
@@ -90,7 +92,6 @@ export default function SignUp() {
     if (!form.countryCode.trim()) {
       newErrors.countryCode = "Country code is required";
     }
-
 
     // Phone number validation
     if (!form.phoneNumber.trim()) {
@@ -150,18 +151,19 @@ export default function SignUp() {
   const createUser = async () => {
     try {
       // Get the country phone number from the country code
-      const selectedCountry = countries.find(c => c.code === form.countryCode);
-      const countryNumber = selectedCountry?.number || '';
-      
-      
+      const selectedCountry = countries.find(
+        (c) => c.code === form.countryCode
+      );
+      const countryNumber = selectedCountry?.number || "";
+
       // Format birthday to YYYY-MM-DD format
-      const formattedBirthday = form.birthday 
-        ? new Date(form.birthday).toISOString().split('T')[0]
-        : '';
+      const formattedBirthday = form.birthday
+        ? new Date(form.birthday).toISOString().split("T")[0]
+        : "";
 
       const currentTimestamp = new Date().getTime();
 
-      const formattedPhone = form.phoneNumber.replace(/\D+/g, "")
+      const formattedPhone = form.phoneNumber.replace(/\D+/g, "");
 
       const userData = {
         userName: form.email,
@@ -174,14 +176,14 @@ export default function SignUp() {
         agreedToCookiePolicyDate: currentTimestamp,
         agreedToPrivacyPolicyDate: currentTimestamp,
         agreedToTextMessageDate: currentTimestamp,
-        region: selectedCountry?.code || '',
-        whatsAppPhone: formattedPhone
+        region: selectedCountry?.code || "",
+        whatsAppPhone: formattedPhone,
       };
 
-      const response = await fetch('https://dev.stedi.me/user', {
-        method: 'POST',
+      const response = await fetch("https://dev.stedi.me/user", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
       });
@@ -190,9 +192,13 @@ export default function SignUp() {
 
       if (!response.ok) {
         if (response.status === 409) {
-          throw new Error("Email or cell # has already been previously registered");
+          throw new Error(
+            "Email or cell # has already been previously registered"
+          );
         } else {
-          throw new Error("Error creating account. Please confirm password is at least 6 characters, has an upper case letter, a lower case letter, a number, and a symbol.");
+          throw new Error(
+            "Error creating account. Please confirm password is at least 6 characters, has an upper case letter, a lower case letter, a number, and a symbol."
+          );
         }
       }
 
@@ -206,17 +212,19 @@ export default function SignUp() {
   const createCustomer = async (loginToken) => {
     try {
       // Get the country code name for region
-      const selectedCountry = countries.find(c => c.code === form.countryCode);
-      const region = selectedCountry?.code || '';
-      
+      const selectedCountry = countries.find(
+        (c) => c.code === form.countryCode
+      );
+      const region = selectedCountry?.code || "";
+
       // Format phone number
       const cleanPhoneNumber = form.phoneNumber.replace(/\D+/g, "");
       const fullPhone = cleanPhoneNumber;
-      
+
       // Format birthday to YYYY-MM-DD format
-      const formattedBirthday = form.birthday 
-        ? new Date(form.birthday).toISOString().split('T')[0]
-        : '';
+      const formattedBirthday = form.birthday
+        ? new Date(form.birthday).toISOString().split("T")[0]
+        : "";
 
       const customerData = {
         customerName: form.name.trim(), // Use the name from the form
@@ -228,20 +236,24 @@ export default function SignUp() {
         gender: form.gender || "Male",
       };
 
-      const response = await fetch('https://dev.stedi.me/customer', {
-        method: 'POST',
+      const response = await fetch("https://dev.stedi.me/customer", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'suresteps.session.token': loginToken,
+          "Content-Type": "application/json",
+          "suresteps.session.token": loginToken,
         },
         body: JSON.stringify(customerData),
       });
 
       if (!response.ok) {
         if (response.status === 409) {
-          throw new Error("Email or cell # has already been previously registered");
+          throw new Error(
+            "Email or cell # has already been previously registered"
+          );
         } else {
-          throw new Error("Error creating account. Please confirm information is correct.");
+          throw new Error(
+            "Error creating account. Please confirm information is correct."
+          );
         }
       }
 
@@ -258,10 +270,10 @@ export default function SignUp() {
       try {
         // First create the user
         const loginToken = await createUser();
-        
+
         // Then create the customer with the login token
         await createCustomer(loginToken);
-        
+
         // Success - show alert and navigate to login
         Alert.alert(
           "Success",
@@ -269,15 +281,16 @@ export default function SignUp() {
           [
             {
               text: "OK",
-              onPress: () => navigation.navigate("Login")
-            }
+              onPress: () => navigation.navigate("Login"),
+            },
           ]
         );
       } catch (error) {
         // Show error alert
         Alert.alert(
           "Error",
-          error.message || "An error occurred while creating your account. Please try again.",
+          error.message ||
+            "An error occurred while creating your account. Please try again.",
           [{ text: "OK" }]
         );
       } finally {
@@ -289,8 +302,7 @@ export default function SignUp() {
     }
   }, [form, navigation]);
 
-  console.log({errors})
-
+  console.log({ errors });
 
   return (
     <SafeAreaView edges={["top"]} style={styles.allBody}>
@@ -313,391 +325,400 @@ export default function SignUp() {
           </Text>
         </View>
       </View>
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-        <ScrollView contentContainerStyle={styles.formContainer}>
-          {/* Email */}
-          <View>
-            <TextInput
-              style={styles.input}
-              label="* Name"
-              mode="outlined"
-              value={form.name}
-              onChangeText={(text) => onChangeFormValue("name", text)}
-              error={!!errors.name}
-            />
-            <HelperText type="error" visible={!!errors.name}>
-              {errors.name}
-            </HelperText>
-          </View>
-          <View>
-            <TextInput
-              style={styles.input}
-              label="* Email"
-              mode="outlined"
-              value={form.email}
-              onChangeText={(text) => onChangeFormValue("email", text)}
-              error={!!errors.email}
-            />
-            <HelperText type="error" visible={!!errors.email}>
-              {errors.email}
-            </HelperText>
-          </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        contentContainerStyle={styles.formContainer}
+      >
+        {/* Name */}
+        <View>
+          <TextInput
+            style={styles.input}
+            label="* Name"
+            mode="outlined"
+            value={form.name}
+            onChangeText={(text) => onChangeFormValue("name", text)}
+            error={!!errors.name}
+          />
+          <HelperText type="error" visible={!!errors.name}>
+            {errors.name}
+          </HelperText>
+        </View>
 
-          <View>
-            <DatePicker
-              label="* Birthday"
-              value={form.birthday}
-              onChange={(date) => onChangeFormValue("birthday", date)}
-              error={!!errors.birthday}
-            />
-            <HelperText type="error" visible={!!errors.birthday}>
-              {errors.birthday}
-            </HelperText>
-          </View>
+        {/* Email */}
+        <View>
+          <TextInput
+            style={styles.input}
+            label="* Email"
+            mode="outlined"
+            value={form.email}
+            onChangeText={(text) => onChangeFormValue("email", text)}
+            error={!!errors.email}
+          />
+          <HelperText type="error" visible={!!errors.email}>
+            {errors.email}
+          </HelperText>
+        </View>
 
-          <View>
-            <Select
-              options={phoneCodes}
-              value={form.countryCode}
-              onSelect={(value) => onChangeFormValue('countryCode', value)}
-              label="* Country Code"
-              placeholder="Select Country Code"
-              error={!!errors.countryCode}
-            />
-            <HelperText type="error" visible={!!errors.countryCode}>
-              {errors.countryCode}
-            </HelperText>
-          </View>
+        <View>
+          <DatePicker
+            label="* Birthday"
+            value={form.birthday}
+            onChange={(date) => onChangeFormValue("birthday", date)}
+            error={!!errors.birthday}
+          />
+          <HelperText type="error" visible={!!errors.birthday}>
+            {errors.birthday}
+          </HelperText>
+        </View>
 
-          <View>
-            <TextInput
-              placeholder="e.g 385-123-45-89"
-              style={styles.phoneInput}
-              label="* Phone Number"
-              mode="outlined"
-              value={form.phoneNumber}
-              onChangeText={(text) => onChangeFormValue("phoneNumber", text)}
-              error={!!errors.phoneNumber}
-            />
-            <HelperText type="error" visible={!!errors.phoneNumber}>
-              {errors.phoneNumber}
-            </HelperText>
-          </View>
+        <View>
+          <Select
+            options={phoneCodes}
+            value={form.countryCode}
+            onSelect={(value) => onChangeFormValue("countryCode", value)}
+            label="* Country Code"
+            placeholder="Select Country Code"
+            error={!!errors.countryCode}
+          />
+          <HelperText type="error" visible={!!errors.countryCode}>
+            {errors.countryCode}
+          </HelperText>
+        </View>
 
-          {/* Password */}
-          <View>
-            <SecurityField
-              label="* Password"
-              value={form.password}
-              onChangeText={(value) => onChangeFormValue("password", value)}
-              placeholder
-              error={!!errors.password}
-            />
-            <HelperText type="error" visible={!!errors.password}>
-              {errors.password}
-            </HelperText>
-          </View>
+        <View>
+          <TextInput
+            placeholder="e.g 385-123-45-89"
+            style={styles.phoneInput}
+            label="* Phone Number"
+            mode="outlined"
+            value={form.phoneNumber}
+            onChangeText={(text) => onChangeFormValue("phoneNumber", text)}
+            error={!!errors.phoneNumber}
+          />
+          <HelperText type="error" visible={!!errors.phoneNumber}>
+            {errors.phoneNumber}
+          </HelperText>
+        </View>
 
-          {/* Confirm Password */}
-          <View>
-            <SecurityField
-              value={form.confirmPassword}
-              onChangeText={(value) =>
-                onChangeFormValue("confirmPassword", value)
-              }
-              label="* Confirm Password"
-              error={!!errors.confirmPassword}
+        {/* Password */}
+        <View>
+          <SecurityField
+            label="* Password"
+            value={form.password}
+            onChangeText={(value) => onChangeFormValue("password", value)}
+            placeholder
+            error={!!errors.password}
+          />
+          <HelperText type="error" visible={!!errors.password}>
+            {errors.password}
+          </HelperText>
+        </View>
+
+        {/* Confirm Password */}
+        <View>
+          <SecurityField
+            value={form.confirmPassword}
+            onChangeText={(value) =>
+              onChangeFormValue("confirmPassword", value)
+            }
+            label="* Confirm Password"
+            error={!!errors.confirmPassword}
+          />
+          <HelperText type="error" visible={!!errors.confirmPassword}>
+            {errors.confirmPassword}
+          </HelperText>
+        </View>
+
+        <View>
+          <Select
+            options={genderOptions}
+            value={form.gender}
+            onSelect={(value) => onChangeFormValue("gender", value)}
+            label="* Gender"
+            placeholder="Select Gender"
+            error={!!errors.gender}
+          />
+          <HelperText type="error" visible={!!errors.gender}>
+            {errors.gender}
+          </HelperText>
+        </View>
+
+        {/* Check box one - Anonymous data sharing */}
+        <View style={styles.checkboxContainer}>
+          <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+            <Checkbox
+              status={form.agreeAnonymous ? "checked" : "unchecked"}
+              onPress={() => {
+                setForm({ ...form, agreeAnonymous: !form.agreeAnonymous });
+              }}
             />
-            <HelperText type="error" visible={!!errors.confirmPassword}>
-              {errors.confirmPassword}
-            </HelperText>
           </View>
+          <Text style={styles.checkboxText}>
+            Agree to share my anonymous data (optional)
+          </Text>
+        </View>
+
+        <Collapsible open={form.agreeAnonymous}>
+          {/* Height */}
           <View>
-            <Select
-              options={genderOptions}
-              value={form.gender}
-              onSelect={(value) => onChangeFormValue("gender", value)}
-              label="* Gender"
-              placeholder="Select Gender"
-              error={!!errors.gender}
-            />
-            <HelperText type="error" visible={!!errors.gender}>
-              {errors.gender}
-            </HelperText>
-          </View>
-          <Collapsible open={form.agreeAnonymous}>
-            {/* Height */}
-            <View>
-              <View style={styles.units.unityHeader}>
-                <Text>Height</Text>
-                <View style={styles.units.unityHeaderController}>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("height", "imperial")}
+            <View style={styles.units.unityHeader}>
+              <Text>Height</Text>
+              <View style={styles.units.unityHeaderController}>
+                <TouchableOpacity
+                  onPress={() => onChangeUnit("height", "imperial")}
+                >
+                  <Text
+                    style={{
+                      fontWeight: unit.height === "imperial" ? "700" : "400",
+                      textDecorationLine:
+                        unit.height === "imperial" ? "underline" : "none",
+                    }}
                   >
-                    <Text
-                      style={{
-                        fontWeight: unit.height === "imperial" ? "700" : "400",
-                        textDecorationLine:
-                          unit.height === "imperial" ? "underline" : "none",
-                      }}
-                    >
-                      Ft
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("height", "metric")}
+                    Ft
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onChangeUnit("height", "metric")}
+                >
+                  <Text
+                    style={{
+                      fontWeight: unit.height === "metric" ? "700" : "400",
+                      textDecorationLine:
+                        unit.height === "metric" ? "underline" : "none",
+                    }}
                   >
-                    <Text
-                      style={{
-                        fontWeight: unit.height === "metric" ? "700" : "400",
-                        textDecorationLine:
-                          unit.height === "metric" ? "underline" : "none",
-                      }}
-                    >
-                      m
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                    m
+                  </Text>
+                </TouchableOpacity>
               </View>
-              <View style={styles.units.sliderContainer}>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.height === "imperial" ? `0'` : `0 M`}</Text>
-                    <Text>{unit.height === "imperial" ? `10'` : `2 M`}</Text>
-                  </View>
-                  <Slider
-                    value={form.heightDec}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("heightDec", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.height === "imperial" ? 10 : 2}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.heightDec
-                  ).toFixed(0)}${
-                    unit.height === "imperial" ? "'" : " M"
-                  }`}</Text>
-                </View>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.height === "imperial" ? `0"` : `0 cm`}</Text>
-                    <Text>{unit.height === "imperial" ? `11"` : `99 cm`}</Text>
-                  </View>
-                  <Slider
-                    value={form.heightUnit}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("heightUnit", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.height === "imperial" ? 11 : 99}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.heightUnit
-                  ).toFixed(0)}${
-                    unit.height === "imperial" ? '"' : " cm"
-                  }`}</Text>
-                </View>
-              </View>
-              <HelperText type="error" visible={!!errors.heightDec}>
-                {errors.heightDec}
-              </HelperText>
             </View>
-            <View>
-              <View style={styles.units.unityHeader}>
-                <Text>Weight</Text>
-                <View style={styles.units.unityHeaderController}>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("weight", "imperial")}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: unit.weight === "imperial" ? "700" : "400",
-                        textDecorationLine:
-                          unit.weight === "imperial" ? "underline" : "none",
-                      }}
-                    >
-                      lbs
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("weight", "metric")}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: unit.weight === "metric" ? "700" : "400",
-                        textDecorationLine:
-                          unit.weight === "metric" ? "underline" : "none",
-                      }}
-                    >
-                      kg
-                    </Text>
-                  </TouchableOpacity>
+            <View style={styles.units.sliderContainer}>
+              <View style={styles.units.slider}>
+                <View style={styles.units.sliderMinMax}>
+                  <Text>{unit.height === "imperial" ? `0'` : `0 M`}</Text>
+                  <Text>{unit.height === "imperial" ? `10'` : `2 M`}</Text>
                 </View>
+                <Slider
+                  value={form.heightDec}
+                  onSlidingComplete={(value) =>
+                    onChangeFormValue("heightDec", value)
+                  }
+                  step={1}
+                  min={0}
+                  max={unit.height === "imperial" ? 10 : 2}
+                />
+                <Text style={{ alignSelf: "center" }}>{`${Number(
+                  form.heightDec
+                ).toFixed(0)}${unit.height === "imperial" ? "'" : " M"}`}</Text>
               </View>
-              <View style={styles.units.sliderContainer}>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.weight === "imperial" ? `0 lbs` : `0 kg`}</Text>
-                    <Text>
-                      {unit.weight === "imperial" ? `300 lbs` : `136 kg`}
-                    </Text>
-                  </View>
-                  <Slider
-                    value={form.weightDec}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("weightDec", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.weight === "imperial" ? 300 : 136}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.weightDec
-                  ).toFixed(0)} ${
-                    unit.weight === "imperial" ? "lbs" : "kg"
-                  }`}</Text>
+              <View style={styles.units.slider}>
+                <View style={styles.units.sliderMinMax}>
+                  <Text>{unit.height === "imperial" ? `0"` : `0 cm`}</Text>
+                  <Text>{unit.height === "imperial" ? `11"` : `99 cm`}</Text>
                 </View>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.weight === "imperial" ? `0 oz` : `0 g`}</Text>
-                    <Text>
-                      {unit.weight === "imperial" ? `15 oz` : `999 g`}
-                    </Text>
-                  </View>
-                  <Slider
-                    value={form.weightUnit}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("weightUnit", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.weight === "imperial" ? 15 : 999}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.weightUnit
-                  ).toFixed(0)} ${
-                    unit.weight === "imperial" ? "oz" : "g"
-                  }`}</Text>
-                </View>
+                <Slider
+                  value={form.heightUnit}
+                  onSlidingComplete={(value) =>
+                    onChangeFormValue("heightUnit", value)
+                  }
+                  step={1}
+                  min={0}
+                  max={unit.height === "imperial" ? 11 : 99}
+                />
+                <Text style={{ alignSelf: "center" }}>{`${Number(
+                  form.heightUnit
+                ).toFixed(0)}${
+                  unit.height === "imperial" ? '"' : " cm"
+                }`}</Text>
               </View>
-              <HelperText type="error" visible={!!errors.weightDec}>
-                {errors.weightDec}
-              </HelperText>
             </View>
-          </Collapsible>
-          {/* Check box one */}
+            <HelperText type="error" visible={!!errors.heightDec}>
+              {errors.heightDec}
+            </HelperText>
+          </View>
+
+          {/* Weight */}
+          <View>
+            <View style={styles.units.unityHeader}>
+              <Text>Weight</Text>
+              <View style={styles.units.unityHeaderController}>
+                <TouchableOpacity
+                  onPress={() => onChangeUnit("weight", "imperial")}
+                >
+                  <Text
+                    style={{
+                      fontWeight: unit.weight === "imperial" ? "700" : "400",
+                      textDecorationLine:
+                        unit.weight === "imperial" ? "underline" : "none",
+                    }}
+                  >
+                    lbs
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onChangeUnit("weight", "metric")}
+                >
+                  <Text
+                    style={{
+                      fontWeight: unit.weight === "metric" ? "700" : "400",
+                      textDecorationLine:
+                        unit.weight === "metric" ? "underline" : "none",
+                    }}
+                  >
+                    kg
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.units.sliderContainer}>
+              <View style={styles.units.slider}>
+                <View style={styles.units.sliderMinMax}>
+                  <Text>{unit.weight === "imperial" ? `0 lbs` : `0 kg`}</Text>
+                  <Text>
+                    {unit.weight === "imperial" ? `300 lbs` : `136 kg`}
+                  </Text>
+                </View>
+                <Slider
+                  value={form.weightDec}
+                  onSlidingComplete={(value) =>
+                    onChangeFormValue("weightDec", value)
+                  }
+                  step={1}
+                  min={0}
+                  max={unit.weight === "imperial" ? 300 : 136}
+                />
+                <Text style={{ alignSelf: "center" }}>{`${Number(
+                  form.weightDec
+                ).toFixed(0)} ${
+                  unit.weight === "imperial" ? "lbs" : "kg"
+                }`}</Text>
+              </View>
+              <View style={styles.units.slider}>
+                <View style={styles.units.sliderMinMax}>
+                  <Text>{unit.weight === "imperial" ? `0 oz` : `0 g`}</Text>
+                  <Text>{unit.weight === "imperial" ? `15 oz` : `999 g`}</Text>
+                </View>
+                <Slider
+                  value={form.weightUnit}
+                  onSlidingComplete={(value) =>
+                    onChangeFormValue("weightUnit", value)
+                  }
+                  step={1}
+                  min={0}
+                  max={unit.weight === "imperial" ? 15 : 999}
+                />
+                <Text style={{ alignSelf: "center" }}>{`${Number(
+                  form.weightUnit
+                ).toFixed(0)} ${
+                  unit.weight === "imperial" ? "oz" : "g"
+                }`}</Text>
+              </View>
+            </View>
+            <HelperText type="error" visible={!!errors.weightDec}>
+              {errors.weightDec}
+            </HelperText>
+          </View>
+        </Collapsible>
+
+        {/* Check box two - SMS consent */}
+        <View>
           <View style={styles.checkboxContainer}>
             <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
               <Checkbox
-                status={form.agreeAnonymous ? "checked" : "unchecked"}
+                style={styles.checkbox}
+                status={form.agreeSMS ? "checked" : "unchecked"}
                 onPress={() => {
-                  setForm({ ...form, agreeAnonymous: !form.agreeAnonymous });
+                  onChangeFormValue("agreeSMS", !form.agreeSMS);
                 }}
               />
             </View>
             <Text style={styles.checkboxText}>
-              Agree to share my anonymous data (optional)
+              I consent to receiving text messages at the cell number I provided
+              (mandatory, must allow STOP opt-out)
             </Text>
           </View>
+          <HelperText type="error" visible={!!errors.agreeSMS}>
+            {errors.agreeSMS}
+          </HelperText>
+        </View>
 
-          {/* Check box two */}
-          <View>
-            <View style={styles.checkboxContainer}>
-              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-                <Checkbox
-                  style={styles.checkbox}
-                  status={form.agreeSMS ? "checked" : "unchecked"}
-                  onPress={() => {
-                    onChangeFormValue("agreeSMS", !form.agreeSMS);
-                  }}
-                />
-              </View>
-              <Text style={styles.checkboxText}>
-                I consent to receiving text messages at the cell number I
-                provided (mandatory, must allow STOP opt-out)
-              </Text>
+        {/* Check box three - Privacy Policy */}
+        <View>
+          <View style={styles.checkboxContainer}>
+            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+              <Checkbox
+                style={styles.checkbox}
+                status={form.agreePrivacy ? "checked" : "unchecked"}
+                onPress={() => {
+                  onChangeFormValue("agreePrivacy", !form.agreePrivacy);
+                }}
+              />
             </View>
-            <HelperText type="error" visible={!!errors.agreeSMS}>
-              {errors.agreeSMS}
-            </HelperText>
+            <Text style={styles.checkboxText}>
+              I have read and agree to the Privacy Policy (mandatory)
+            </Text>
           </View>
-          {/* Check box three */}
-          <View>
-            <View style={styles.checkboxContainer}>
-              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-                <Checkbox
-                  style={styles.checkbox}
-                  status={form.agreePrivacy ? "checked" : "unchecked"}
-                  onPress={() => {
-                    onChangeFormValue("agreePrivacy", !form.agreePrivacy);
-                  }}
-                />
-              </View>
-              <Text style={styles.checkboxText}>
-                I have read and agree to the Privacy Policy (mandatory)
-              </Text>
-            </View>
-            <HelperText type="error" visible={!!errors.agreePrivacy}>
-              {errors.agreePrivacy}
-            </HelperText>
-          </View>
-          {/* Check box four */}
-          <View>
-            <View style={styles.checkboxContainer}>
-              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-                <Checkbox
-                  style={styles.checkbox}
-                  status={form.agreeTerms ? "checked" : "unchecked"}
-                  onPress={() => {
-                    onChangeFormValue("agreeTerms", !form.agreeTerms);
-                  }}
-                />
-              </View>
-              <Text style={styles.checkboxText}>
-                I have read and agree to the Terms of Use Policy (mandatory)
-              </Text>
-            </View>
-            <HelperText type="error" visible={!!errors.agreeTerms}>
-              {errors.agreeTerms}
-            </HelperText>
-          </View>
-          <View>
-            <View style={styles.checkboxContainer}>
-              <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
-                <Checkbox
-                  style={styles.checkbox}
-                  status={form.agreeCookie ? "checked" : "unchecked"}
-                  onPress={() => {
-                    onChangeFormValue("agreeCookie", !form.agreeCookie);
-                  }}
-                />
-              </View>
-              <Text style={styles.checkboxText}>
-                I have read and agree to the Cookie Policy (mandatory)
-              </Text>
-            </View>
-            <HelperText type="error" visible={!!errors.agreeCookie}>
-              {errors.agreeCookie}
-            </HelperText>
-          </View>
+          <HelperText type="error" visible={!!errors.agreePrivacy}>
+            {errors.agreePrivacy}
+          </HelperText>
+        </View>
 
-          {/* Spacer */}
-          <View style={styles.spacer} />
+        {/* Check box four - Terms of Use */}
+        <View>
+          <View style={styles.checkboxContainer}>
+            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+              <Checkbox
+                style={styles.checkbox}
+                status={form.agreeTerms ? "checked" : "unchecked"}
+                onPress={() => {
+                  onChangeFormValue("agreeTerms", !form.agreeTerms);
+                }}
+              />
+            </View>
+            <Text style={styles.checkboxText}>
+              I have read and agree to the Terms of Use Policy (mandatory)
+            </Text>
+          </View>
+          <HelperText type="error" visible={!!errors.agreeTerms}>
+            {errors.agreeTerms}
+          </HelperText>
+        </View>
 
-          {/* Sign Up Button */}
-          <Button
-            mode="contained"
-            onPress={onSubmit}
-            style={{ ...styles.signUpButton, marginBottom: bottom }}
-            loading={isLoading}
-            disabled={isLoading}
-          >
-            {isLoading ? "Creating Account..." : "Sign Up"}
-          </Button>
-        </ScrollView>
+        {/* Check box five - Cookie Policy */}
+        <View>
+          <View style={styles.checkboxContainer}>
+            <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
+              <Checkbox
+                style={styles.checkbox}
+                status={form.agreeCookie ? "checked" : "unchecked"}
+                onPress={() => {
+                  onChangeFormValue("agreeCookie", !form.agreeCookie);
+                }}
+              />
+            </View>
+            <Text style={styles.checkboxText}>
+              I have read and agree to the Cookie Policy (mandatory)
+            </Text>
+          </View>
+          <HelperText type="error" visible={!!errors.agreeCookie}>
+            {errors.agreeCookie}
+          </HelperText>
+        </View>
+
+        {/* Spacer */}
+        <View style={styles.spacer} />
+
+        {/* Sign Up Button */}
+        <Button
+          mode="contained"
+          onPress={onSubmit}
+          style={{ ...styles.signUpButton, marginBottom: bottom }}
+          loading={isLoading}
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating Account..." : "Sign Up"}
+        </Button>
       </ScrollView>
     </SafeAreaView>
   );
@@ -760,53 +781,49 @@ const styles = StyleSheet.create({
   },
   checkboxContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: 8,
-    marginBottom: 8,
+    marginVertical: 8,
   },
   checkbox: {
-    backgroundColor: "#F6F6F6",
-    borderRadius: "100%",
-    boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-    marginTop: 2,
+    borderRadius: 50,
   },
-  //break the text if it's too long
   checkboxText: {
     flex: 1,
     fontSize: 14,
-    color: "black",
-    fontWeight: "500",
-    fontStyle: "italic",
-    marginVertical: "auto",
+  },
+  signUpButton: {
+    borderRadius: 10,
+    paddingVertical: 8,
   },
   spacer: {
-    height: 20, // Add some extra space before the button
+    height: 20,
   },
   units: {
     unityHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
     },
     unityHeaderController: {
-      marginTop: 20,
       flexDirection: "row",
-      gap: 20,
-    },
-    slider: {
-      flex: 1,
+      gap: 16,
     },
     sliderContainer: {
       flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
+      gap: 8,
+      paddingHorizontal: 16,
+    },
+    slider: {
+      flex: 1,
+      gap: 4,
     },
     sliderMinMax: {
       flexDirection: "row",
       justifyContent: "space-between",
     },
-  },
-  signUpButton: {
-    marginBottom: 30,
   },
 });
 
@@ -815,8 +832,8 @@ const genderOptions = [
   { label: "Female", value: "female" },
 ];
 
-
-  const phoneCodes = countries?.map((country) => ({
+const phoneCodes =
+  countries?.map((country) => ({
     label: country.name,
     value: country.code,
   })) || [];

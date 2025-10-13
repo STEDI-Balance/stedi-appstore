@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // with react-navigation I can change screens from one component to another easily
 import { useNavigation } from '@react-navigation/native';//this is another react hook
 
-const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
+const Login = ({ loggedInState, loggedInStates, setLoggedInState, setSessionToken, setUserName }) => {
   const navigation = useNavigation();
   const [form, setForm] = React.useState({
     phoneNumber: "",
@@ -50,9 +50,14 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
         "https://dev.stedi.me/validate/" + sessionToken
       );
       const userName = await userNameResponse.text();
-      console.log("sessionToken in Login Button", sessionToken);
+
       await AsyncStorage.setItem("sessionToken", sessionToken); //local storage
       await AsyncStorage.setItem("userName", userName);
+      
+      // Update the App.js state with session token and userName
+      if (setSessionToken) setSessionToken(sessionToken);
+      if (setUserName) setUserName(userName);
+      
       //   setLoggedInState(loggedInStates.LOGGED_IN);
       navigation.replace("Navigation");
     } else {
@@ -89,6 +94,7 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
         >
           <Text style={styles.signUpLink}>Don't have Account?</Text>
         </TouchableOpacity>
+        
         <TouchableOpacity
           style={styles.sendButton}
           onPress={() => {
@@ -120,6 +126,7 @@ const Login = ({ loggedInState, loggedInStates, setLoggedInState }) => {
           keyboardType="numeric"
         />
         {/* <View style={{...styles.allBody,flexDirection:"row"}}> */}
+
 
         <TouchableOpacity
           style={styles.loginButton}
@@ -153,13 +160,14 @@ export default Login
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   allBody: {
     marginTop: 150,
     marginLeft: 20,
-    marginRight: 20
+    marginRight: 20,
+    gap: 4,
   },
   input: {
     height: 45,
@@ -169,61 +177,59 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   margin: {
-    marginTop: 100
+    marginTop: 100,
   },
   bioButton: {
-    alignItems: 'center',
-    backgroundColor: '#A0CE4E',
+    alignItems: "center",
+    backgroundColor: "#A0CE4E",
     padding: 10,
     marginTop: 5,
-    borderRadius: 10
+    borderRadius: 10,
   },
   sendButton: {
-    alignItems: 'center',
-    backgroundColor: '#A0CE4E',
+    alignItems: "center",
+    backgroundColor: "#A0CE4E",
     padding: 10,
-    marginTop: 8,
-    borderRadius: 10
+    borderRadius: 10,
   },
   loginButton: {
-    alignItems: 'center',
-    backgroundColor: '#A0CE4E',
+    alignItems: "center",
+    backgroundColor: "#A0CE4E",
     padding: 10,
-    borderRadius: 10
+    borderRadius: 10,
   },
   title: {
     textAlign: "center",
-    color: '#A0CE4E',
+    color: "#A0CE4E",
     fontSize: 40,
-    fontWeight: 'bold',
-    marginBottom: 35
+    fontWeight: "bold",
+    marginBottom: 35,
   },
   image: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   tinyLogo: {
     width: 50,
     height: 50,
     marginTop: 100,
-    justifyContent: 'center'
+    justifyContent: "center",
   },
-  
+
   paragraph: {
-    textAlign: 'center'
+    textAlign: "center",
   },
   signUpButton: {
     padding: 10,
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     borderRadius: 5,
   },
   signUpLink: {
-    color: 'gray',
-    textAlign: 'left',
+    color: "gray",
+    textAlign: "left",
     marginLeft: 0,
     fontSize: 14,
     marginTop: 2,
-    marginBottom: 2
-  }
-
-})
+    marginBottom: 2,
+  },
+});

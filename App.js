@@ -10,6 +10,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignUp from './screens/SignUp';
 import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
 import { customTheme } from "./utils/Constants";
+import { UserContextProvider } from './utils/context';
+
 
 
 
@@ -27,12 +29,14 @@ const App = () => {
     loggedInStates.NOT_LOGGED_IN
   );
   const [sessionToken, setSessionToken] = React.useState("");
+  const [userName, setUserName] = React.useState("");
   const [onBoarded, setOnBoarded] = React.useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onBoardedRef = useRef(false);
 
   const scanForDevices = async () => {
     const isPermissionsEnabled = await requestPermissions();
+    console.log("Permission Enabled after requesting: " + isPermissionsEnabled);
     console.log("Permission Enabled after requesting: " + isPermissionsEnabled);
     if (isPermissionsEnabled) {
       scanForPeripherals();
@@ -55,7 +59,9 @@ const App = () => {
       onBoardedRef.current = "true" == getOnBoarded;
       console.log("onBoarded:", getOnBoarded);
       const sessionToken = await AsyncStorage.getItem("sessionToken");
+      const storedUserName = await AsyncStorage.getItem("userName");
       console.log("sessionToken", sessionToken);
+      console.log("userName", storedUserName);
 
       if (sessionToken) {
         const validateResponse = await fetch(
@@ -72,8 +78,13 @@ const App = () => {
           //we know it is a good non-expired token
           const userName = await validateResponse.text();
           await AsyncStorage.setItem("userName", userName); //save user name for later
+          setUserName(userName); // Set userName state
           setLoggedInState(loggedInStates.LOGGED_IN);
+          setSessionToken(sessionToken); // Set sessionToken state
         }
+      } else if (storedUserName) {
+        // If we have a stored userName but no session token, set it anyway
+        setUserName(storedUserName);
       }
       console.log("app.js login:", loggedInState);
       let initialRouteName =
@@ -111,6 +122,7 @@ const App = () => {
     //       </Text>
     //     )}
     //   </View>
+    //   </View>
     //   <TouchableOpacity
     //     onPress={connectedDevice ? disconnectFromDevice : openModal}
     //     style={styles.ctaButton}
@@ -125,55 +137,61 @@ const App = () => {
     //     connectToPeripheral={connectToDevice}
     //     devices={allDevices}
     //   />
+    //   />
     // </SafeAreaView>
-    <PaperProvider theme={customTheme}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {/* We only show the Onboarding component the first time they run the app*/}
-            {onBoarded ? null : (
+    <UserContextProvider sessionToken={sessionToken} userName={userName}>
+      <PaperProvider theme={customTheme}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              {/* We only show the Onboarding component the first time they run the app*/}
+              {onBoarded ? null : (
+                <Stack.Screen
+                  name="Onboarding"
+                  children={() => (
+                    <OnboardingScreen
+                      setFirstLaunch={setFirstLaunch}
+                      loggedInStates={loggedInStates}
+                      loggedInState={loggedInState}
+                    />
+                  )}
+                />
+              )}
+              {/* We  show the login component if they don't have a valid login token already stored in the app*/}
               <Stack.Screen
-                name="Onboarding"
+                name="Login"
                 children={() => (
-                  <OnboardingScreen
-                    setFirstLaunch={setFirstLaunch}
+                  <Login
                     loggedInStates={loggedInStates}
                     loggedInState={loggedInState}
+                    setLoggedInState={setLoggedInState}
+                    setSessionToken={setSessionToken}
+                    setUserName={setUserName}
                   />
                 )}
               />
-            )}
-            {/* We  show the login component if they don't have a valid login token already stored in the app*/}
-            <Stack.Screen
-              name="Login"
-              children={() => (
-                <Login
-                  loggedInStates={loggedInStates}
-                  loggedInState={loggedInState}
-                  setLoggedInState={setLoggedInState}
-                  setSessionToken={setSessionToken}
-                />
-              )}
-            />
-            <Stack.Screen name="SignUp" children={() => <SignUp />} />
-            {/* If they have logged in, and seen the onboarding component, we show them the tabbed navigation component*/}
-            <Stack.Screen
-              name="Navigation"
-              children={() => (
-                <Navigation
-                  loggedInStates={loggedInStates}
-                  loggedInState={loggedInState}
-                  setLoggedInState={setLoggedInState}
-                  sessionToken={sessionToken}
-                />
-              )}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </PaperProvider>
+              <Stack.Screen name="SignUp" children={() => <SignUp />} />
+              {/* If they have logged in, and seen the onboarding component, we show them the tabbed navigation component*/}
+              <Stack.Screen
+                name="Navigation"
+                children={() => (
+                  <Navigation
+                    loggedInStates={loggedInStates}
+                    loggedInState={loggedInState}
+                    setLoggedInState={setLoggedInState}
+                    sessionToken={sessionToken}
+                  />
+                )}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </PaperProvider>
+    </UserContextProvider>
   );
 };
+
+export default App;
 
 const styles = StyleSheet.create({
   container: {
@@ -211,9 +229,5 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
-
- export default App;
-
-
 
 
