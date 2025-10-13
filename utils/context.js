@@ -4,18 +4,21 @@ import React, { createContext, useEffect, useState } from "react";
 
 const UserContext = createContext({
   user: null,
-  setUser: () => {},
+    setUser: () => { },
+  sessionToken: null,
 });
 
 const UserContextProvider = ({ children, sessionToken, userName }) => {
 
   const [user, setUser] = useState(null);
 
+
+
     useEffect(() => {
         const fetchUserData = async () => {
           try {
-                const response = await fetch(`https://dev.stedi.me/user/${userName}`, {
-                    headers: {
+            const response = await fetch(`https://dev.stedi.me/user/${userName}`, {
+                headers: {
                         "suresteps.session.token": sessionToken
                     }
                 });
@@ -30,13 +33,18 @@ const UserContextProvider = ({ children, sessionToken, userName }) => {
             }
         };
 
-       if(!user && userName && sessionToken) {
+      
+
+      if (!user && userName && sessionToken) {
+
            fetchUserData();
        }
-    }, [sessionToken, userName]);
+    }, [userName]);
+
+
 
     return (
-        <UserContext.Provider value={{ user, setUser }}>
+        <UserContext.Provider value={{ user, setUser, sessionToken }}>
             {children}
         </UserContext.Provider>
     );

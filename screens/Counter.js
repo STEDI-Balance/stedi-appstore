@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, Share, Linking } from 'react-native';
 import { Card, Title, Paragraph } from 'react-native-paper';
 import Speedometer, {
@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ManuallyCounter from '../components/ManuallyCounter';
 import BleCounter from '../components/BleCounter';
 import DeviceSetupOnboarding from '../components/DeviceSetupOnboarding'; // ADDED
+import { UserContext } from '../utils/context';
 
 export default function Counter(props) {
   const [completionCount, setCompletionCount] = useState(0);
@@ -20,19 +21,34 @@ export default function Counter(props) {
   const [currentScreen, setCurrentScreen] = useState('counter');
   const [shareToken, setShareToken] = useState("");
   const [bleCharacteristic, setBleCharacteristic] = useState(0); // variable to keep track of what the BLE device is measuring
-
-  const [showOnboarding, setShowOnboarding] = useState(true); // ADDED
+  const {user} = useContext(UserContext)
+  const [showOnboarding, setShowOnboarding] = useState(!user ? false : user?.deviceNickName?.length > 0); 
+  
+  console.log({showOnboarding})
 
   useEffect(() => {
     const getUserName = async () => {
       userName.current = await AsyncStorage.getItem('userName');
-      console.log('Counter userName', userName.current);
+      // console.log('Counter userName', userName.current);
       token.current = await AsyncStorage.getItem('sessionToken');
       setShareToken(token.current);
-      console.log('counter token:', token.current);
+      // console.log('counter token:', token.current);
     };
     getUserName();
   }, []);
+
+  useEffect(() => {
+    const verifyUserDevice = () => {
+      if (user?.deviceNickName?.length > 0) {
+        setShowOnboarding(false);
+        return;
+      }
+      setShowOnboarding(true);
+    }
+    verifyUserDevice();
+  },[user?.deviceNickName])
+
+
 // Decides where to navigate after completing a set. Either to the result screen or the take a break screen
   useEffect(() => {
     const redirect = async () => {
@@ -178,8 +194,14 @@ export default function Counter(props) {
   const close = () => {
     setCompletionCount(0);
     setCurrentScreen('counter');
-    setStepCount(0);
+    setStepCount(0);  
     setCounter(180);
+  }
+
+
+
+  const onFinishDeviceId = () => { // ADDED
+    setShowOnboarding(false);
   }
 
   const shareProgress = async () => {// Share progress functionallity. Currently not fully implemented.  (From what I can tell lol)
@@ -248,7 +270,7 @@ export default function Counter(props) {
 
   const { x, y, z } = data.current;
   let total_amount_xyz = Math.sqrt(x * x + y * y + z * z) * 9.81;
-
+DeviceSetupOnboarding
   if (currentScreen === 'counter') {// Styles for Counter screen and functionality behind buttons.
     return (
       <View style={styles.screen}>
@@ -256,7 +278,7 @@ export default function Counter(props) {
         {showOnboarding && (
           <DeviceSetupOnboarding
             visible={showOnboarding}
-            onFinish={() => setShowOnboarding(false)}
+            onClose={ onFinishDeviceId}
           />
         )}
 

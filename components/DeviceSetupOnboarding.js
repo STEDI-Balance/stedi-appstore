@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Modal,
   View,
@@ -7,21 +7,75 @@ import {
   Pressable,
   TextInput,
   Image,
-  ScrollView
+  ScrollView,
+  Alert
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Onboarding from "react-native-onboarding-swiper";
+import { UserContext } from "../utils/context";
 
 export default function DeviceSetupOnboarding({
   visible,
-  onFinish,
+  onClose,
   onScanQR,
   onOpenStore
 }) {
   const [hasDevice, setHasDevice] = useState(null);
   const [deviceId, setDeviceId] = useState("");
+  const { user, sessionToken } = useContext(UserContext);
+  const [savingDevice, setSavingDevice] = useState(false);
 
-  if (!visible) return null;
+
+  if (!visible || !user?.userName) return null;
+
+
+
+  const onSaveDeviceId = async () => {
+
+    if (!user.userName || !sessionToken) return;
+    
+    setSavingDevice(true);
+
+     const body = {
+       deviceNickName: deviceId,
+     }
+    
+  
+    try {
+      const response = await fetch(
+        `https://dev.stedi.me/user/${user.userName}`,
+        {
+          method: "PATCH",
+          headers: {
+            "content-type": "application/json",
+            "suresteps.session.token": sessionToken
+          },
+          body: JSON.stringify(body),
+        }
+      );
+     
+      if (response.ok) {
+      
+        setUser((prevUser) => ({
+          ...prevUser,
+          deviceNickName: deviceId,
+        }));
+        setSavingDevice(false);
+        if (onClose) onClose({ hasDevice, deviceId });
+      } else {
+        console.log("Failed to save Device ID:", response.status);
+        Alert.alert("Error", "Failed to save Device ID. Please try again.");
+        setSavingDevice(false);
+      }
+    } catch (error) {
+      console.log("Error saving Device ID:", error);
+      Alert.alert("Error", "An error occurred while saving Device ID. Please try again.");
+      setSavingDevice(false);
+    }
+    
+  
+    }
+
 
   const CheckingDevice = (
     <TopAlignedPage>
@@ -84,8 +138,8 @@ export default function DeviceSetupOnboarding({
       <Pressable
         accessibilityRole="button"
         style={[styles.primaryBtn, { opacity: deviceId.trim() ? 1 : 0.5 }]}
-        disabled={!deviceId.trim()}
-        onPress={() => onFinish?.({ hasDevice: true, deviceId })}
+        // disabled={!deviceId.trim()}
+        onPress={onSaveDeviceId}
       >
         <Text style={styles.primaryBtnText}>Save</Text>
       </Pressable>
@@ -124,7 +178,7 @@ export default function DeviceSetupOnboarding({
 
   const handleDone = () => {
     if (hasDevice === false) onOpenStore?.();
-    else onFinish?.({ hasDevice, deviceId });
+    else onClose?.({ hasDevice, deviceId });
   };
 
   return (
@@ -134,7 +188,7 @@ export default function DeviceSetupOnboarding({
         <Onboarding
           testID="onboarding-component"
           pages={pages}
-          onSkip={handleDone}
+          onSkip={handleDone} 
           onDone={handleDone}
           containerStyles={styles.onboardingContainer}
           imageContainerStyles={styles.imageContainer}
@@ -144,7 +198,7 @@ export default function DeviceSetupOnboarding({
           nextLabel={<Text style={styles.nextText}>Next</Text>}
           skipLabel={<Text style={styles.skipText}>Skip</Text>}
           DoneButtonComponent={(props) => (
-            <Pressable accessibilityRole="button" style={styles.doneBtn} {...props}>
+            <Pressable disabled={deviceId.trim().length === 0} accessibilityRole="button" style={styles.doneBtn} {...props}>
               <Text style={styles.doneText}>Done</Text>
             </Pressable>
           )}

@@ -79,6 +79,7 @@ const App = () => {
           await AsyncStorage.setItem("userName", userName); //save user name for later
           setUserName(userName); // Set userName state
           setLoggedInState(loggedInStates.LOGGED_IN);
+          setSessionToken(sessionToken); // Set sessionToken state
         }
       } else if (storedUserName) {
         // If we have a stored userName but no session token, set it anyway
