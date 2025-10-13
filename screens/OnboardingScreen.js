@@ -57,14 +57,14 @@ const OnboardingScreen = ({setFirstLaunch, loggedInState, loggedInStates}) =>{
               backgroundColor: '#fff',
               image: <Image   style={{height: '60%', width: '90%', resizeMode:'contain', marginBottom:-200}} source={require('../image/testing.png')} />,
               title: <Text style={{fontWeight:'bold', textAlign:'center', color:'#A0CE4E', fontSize:19, margin:12,  marginTop: -80}}>Welcome to STEDI  Balance</Text>,
-              subtitle: 'Welcome to STEDI, we value your privacy. We will never sell your data or share it without permission. You will receive a text shortly to verify your phone number for your STEDI account.',
+              subtitle: <Text style={{textAlign:'center', fontSize:16, margin:12}}>Welcome to STEDI, we value your privacy. We will never sell your data or share it without permission. You will receive a text shortly to verify your phone number for your STEDI account.</Text>,
             },
 
               {
                 backgroundColor: '#fff',
                 image: <Image style={{height: '70%', width:'90%',  resizeMode:'contain', marginTop:-100}} source={require('../image/refer.png')} />,
                 title: <Text style={{fontWeight:'bold', textAlign:'center', fontSize: 19, margin:15, color:'#A0CE4E', marginTop:-160}}>Share STEDI Balance with you friends</Text>,
-                subtitle: 'Share and invite your family and friends to see your progress with STEDI',
+                subtitle: <Text style={{textAlign:'center', fontSize:16, margin:12}}>Share and invite your family and friends to see your progress with STEDI</Text>,
 
               }
         ]}

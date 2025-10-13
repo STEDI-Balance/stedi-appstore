@@ -325,7 +325,11 @@ export default function SignUp() {
           </Text>
         </View>
       </View>
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.container} contentContainerStyle={styles.formContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        contentContainerStyle={styles.formContainer}
+      >
         {/* Name */}
         <View>
           <TextInput
@@ -506,9 +510,7 @@ export default function SignUp() {
                 />
                 <Text style={{ alignSelf: "center" }}>{`${Number(
                   form.heightDec
-                ).toFixed(0)}${
-                  unit.height === "imperial" ? "'" : " M"
-                }`}</Text>
+                ).toFixed(0)}${unit.height === "imperial" ? "'" : " M"}`}</Text>
               </View>
               <View style={styles.units.slider}>
                 <View style={styles.units.sliderMinMax}>
@@ -595,9 +597,7 @@ export default function SignUp() {
               <View style={styles.units.slider}>
                 <View style={styles.units.sliderMinMax}>
                   <Text>{unit.weight === "imperial" ? `0 oz` : `0 g`}</Text>
-                  <Text>
-                    {unit.weight === "imperial" ? `15 oz` : `999 g`}
-                  </Text>
+                  <Text>{unit.weight === "imperial" ? `15 oz` : `999 g`}</Text>
                 </View>
                 <Slider
                   value={form.weightUnit}
@@ -634,8 +634,8 @@ export default function SignUp() {
               />
             </View>
             <Text style={styles.checkboxText}>
-              I consent to receiving text messages at the cell number I
-              provided (mandatory, must allow STOP opt-out)
+              I consent to receiving text messages at the cell number I provided
+              (mandatory, must allow STOP opt-out)
             </Text>
           </View>
           <HelperText type="error" visible={!!errors.agreeSMS}>

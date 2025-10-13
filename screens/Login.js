@@ -160,80 +160,76 @@ export default Login
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   allBody: {
     marginTop: 150,
     marginLeft: 20,
     marginRight: 20,
-    gap: 10
+    gap: 4,
   },
   input: {
     height: 45,
     marginTop: 25,
-    marginBottom: 25,
     //  borderWidth: 1,
     padding: 10,
     borderRadius: 10,
   },
   margin: {
-    marginTop: 100
+    marginTop: 100,
   },
   bioButton: {
-    alignItems: 'center',
-    backgroundColor: '#A0CE4E',
+    alignItems: "center",
+    backgroundColor: "#A0CE4E",
     padding: 10,
     marginTop: 5,
-    borderRadius: 10
+    borderRadius: 10,
   },
   sendButton: {
-    alignItems: 'center',
-    backgroundColor: '#A0CE4E',
+    alignItems: "center",
+    backgroundColor: "#A0CE4E",
     padding: 10,
-    marginTop: 8,
-    borderRadius: 10
+    borderRadius: 10,
   },
   loginButton: {
-    alignItems: 'center',
-    backgroundColor: '#A0CE4E',
+    alignItems: "center",
+    backgroundColor: "#A0CE4E",
     padding: 10,
-    borderRadius: 10
+    borderRadius: 10,
   },
   title: {
     textAlign: "center",
-    color: '#A0CE4E',
+    color: "#A0CE4E",
     fontSize: 40,
-    fontWeight: 'bold',
-    marginBottom: 35
+    fontWeight: "bold",
+    marginBottom: 35,
   },
   image: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   tinyLogo: {
     width: 50,
     height: 50,
     marginTop: 100,
-    justifyContent: 'center'
+    justifyContent: "center",
   },
-  
-  
+
   paragraph: {
-    textAlign: 'center'
+    textAlign: "center",
   },
   signUpButton: {
     padding: 10,
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     borderRadius: 5,
   },
   signUpLink: {
-    color: 'gray',
-    textAlign: 'left',
+    color: "gray",
+    textAlign: "left",
     marginLeft: 0,
     fontSize: 14,
     marginTop: 2,
-    marginBottom: 2
-  }
-
-})
+    marginBottom: 2,
+  },
+});

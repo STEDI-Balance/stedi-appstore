@@ -16,7 +16,12 @@ import Onboarding from "react-native-onboarding-swiper";
 import { UserContext } from "../utils/context";
 import { customTheme } from "../utils/Constants";
 
-export default function DeviceSetupOnboarding({ visible, onClose, onScanQR, onOpenStore }) {
+export default function DeviceSetupOnboarding({
+  visible,
+  onClose,
+  onScanQR,
+  onOpenStore,
+}) {
   const [hasDevice, setHasDevice] = useState(null);
   const [deviceId, setDeviceId] = useState("");
   const { user, setUser, sessionToken } = useContext(UserContext);
@@ -183,7 +188,7 @@ export default function DeviceSetupOnboarding({ visible, onClose, onScanQR, onOp
       >
         Save
       </Button>
-      {deviceStatus && <Text style={styles.deviceStatus}>{deviceStatus}</Text>}s{" "}
+      {deviceStatus && <Text style={styles.deviceStatus}>{deviceStatus}</Text>}
     </TopAlignedPage>
   );
 
@@ -292,7 +297,6 @@ export default function DeviceSetupOnboarding({ visible, onClose, onScanQR, onOp
                 {...props}
               >
                 <Text style={[!canConclude && styles.doneButtonText]}>
-                  {" "}
                   Done
                 </Text>
               </TouchableOpacity>
@@ -356,7 +360,6 @@ function Choice({ label, emoji, active, onPress, tone }) {
       <Text
         style={[active && tone === "no" && styles.choiceButtonTextNoActive]}
       >
-        {" "}
         {label} {emoji}
       </Text>
     </Button>
