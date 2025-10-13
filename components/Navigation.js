@@ -120,6 +120,7 @@ export default function Navigation(props) {
     <Tab.Navigator
       initialRouteName="TabCounter"
       screenOptions={{
+          headerShown: false, //Hide the header for this screen
         tabBarActiveTintColor: "#A0CE4E",
         tabBarInactiveTintColor: "rgba(0, 0, 0, 0.3)",
         tabBarStyle: {
@@ -139,6 +140,7 @@ export default function Navigation(props) {
         // component={counterStackScreen}
         children={() => <CounterStackScreen />}
         options={{
+            headerShown: false, //Hide the header for this screen
           // tabBarColor:'pink',
           tabBarLabel: "Counter",
           tabBarIcon: ({ color }) => (
@@ -153,6 +155,7 @@ export default function Navigation(props) {
           <ProfileStackScreen setLoggedInState={props.setLoggedInState} />
         )}
         options={{
+            headerShown: false, //Hide the header for this screen
           // tabBarColor:'pink',
           tabBarLabel: "Profile",
           tabBarIcon: ({ color }) => (
@@ -164,6 +167,7 @@ export default function Navigation(props) {
         name="TabAbout"
         component={AboutStackScreen}
         options={{
+            headerShown: false, //Hide the header for this screen
           // tabBarColor:'pink',
           tabBarLabel: "About",
           tabBarIcon: ({ color }) => (
@@ -176,6 +180,7 @@ export default function Navigation(props) {
         // component={HelpStackScreen}
         children={() => <HelpStackScreen sessionToken={props.sessionToken} />}
         options={{
+            headerShown: false, //Hide the header for this screen
           // tabBarColor:'pink',
           tabBarLabel: "Help",
           tabBarIcon: ({ color }) => (
