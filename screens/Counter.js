@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, Share, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, Title, Paragraph } from 'react-native-paper';
 import Speedometer, {
   Background, Arc, Needle, Progress, Marks, Indicator, DangerPath
@@ -19,17 +20,17 @@ export default function Counter(props) {
   const [score, setScore] = useState(0);
   const [currentScreen, setCurrentScreen] = useState('counter');
   const [shareToken, setShareToken] = useState("");
-  const [bleCharacteristic, setBleCharacteristic] = useState(0); // variable to keep track of what the BLE device is measuring
+  const [bleCharacteristic, setBleCharacteristic] = useState(0); // what the BLE device is measuring
 
   const [showOnboarding, setShowOnboarding] = useState(true); // ADDED
 
   useEffect(() => {
     const getUserName = async () => {
       userName.current = await AsyncStorage.getItem('userName');
-      console.log('Counter userName', userName.current);
       token.current = await AsyncStorage.getItem('sessionToken');
       setShareToken(token.current);
-      console.log('counter token:', token.current);
+      // console.log('Counter userName', userName.current);
+      // console.log('counter token:', token.current);
     };
     getUserName();
   }, []);
@@ -39,42 +40,39 @@ export default function Counter(props) {
       if (currentScreen === 'counter') {
         if (completionCount === 1) {
           setCurrentScreen('break');
-          console.log('completionCount:', completionCount);
-        }
-        else if (completionCount === 2) {
+        } else if (completionCount === 2) {
           await getResults();
           setCurrentScreen('result');
         }
       }
-    }
+    };
     redirect();
   }, [completionCount]);
 
   useEffect(() => {
-    counter > 0 && setTimeout(() => {
-      if (currentScreen === 'break') {
-        if (counter === 1) {
-          setCurrentScreen('counter');
-          setStepCount(0);
+    if (counter > 0) {
+      const t = setTimeout(() => {
+        if (currentScreen === 'break') {
+          if (counter === 1) {
+            setCurrentScreen('counter');
+            setStepCount(0);
+          }
+          setCounter(prev => prev - 1);
         }
-        setCounter(counter - 1);
-      }
-    }, 1000);
+      }, 1000);
+      return () => clearTimeout(t);
+    }
   }, [counter, currentScreen]);
 
   const clockify = () => {
     let hours = Math.floor(counter / 60 / 60);
-    let minutes = Math.floor(counter / 60 % 60);
+    let minutes = Math.floor((counter / 60) % 60);
     let seconds = Math.floor(counter % 60);
 
     let displayHours = hours < 10 ? `0${hours}` : hours;
     let displayMinutes = minutes < 10 ? `0${minutes}` : minutes;
     let displaySeconds = seconds < 10 ? `0${seconds}` : seconds;
-    return {
-      displayHours,
-      displayMinutes: displayMinutes,
-      displaySeconds,
-    };
+    return { displayHours, displayMinutes, displaySeconds };
   };
 
   const customer = useRef();
@@ -84,17 +82,14 @@ export default function Counter(props) {
   const token = useRef("");
   const userName = useRef("");
 
-  const savingSteps = async (event) => {
-    let stepPoints = [];
+  const savingSteps = async () => {
     const lastStep = steps.current[29];
     const firstStep = steps.current[0];
     stopTime.current = lastStep.time;
-
     testTime.current = lastStep.time - firstStep.time;
 
     let previousTime = startTime.current;
-
-    stepPoints = [];
+    const stepPoints = [];
     steps.current.forEach(stepObject => {
       const stepTime = stepObject.time - previousTime;
       previousTime = stepObject.time;
@@ -102,7 +97,6 @@ export default function Counter(props) {
     });
 
     try {
-      console.log('token:', token.current);
       await fetch('https://dev.stedi.me/rapidsteptest', {
         method: 'POST',
         headers: {
@@ -117,98 +111,69 @@ export default function Counter(props) {
           testTime: testTime.current,
           totalSteps: 30
         })
-      })
-    }
-    catch (error) {
+      });
+    } catch (error) {
       console.log('save error', error);
     }
-  }
+  };
 
   const getResults = async () => {
     try {
-      console.log('UserName:' + userName.current);
-      console.log('Token before calling score:' + token.current);
       const scoreResponse = await fetch('https://dev.stedi.me/riskscore/' + userName.current, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'suresteps.session.token': token.current
         }
-      })
-      console.log(`Response status: ${scoreResponse.status}`);
-      const scoreText = await scoreResponse.text();
-      console.log(`Response text: ${scoreText}`)
+      });
       const scoreObject = await scoreResponse.json();
-      console.log("score:", scoreObject.score);
       setScore(scoreObject.score);
-
     } catch (error) {
       console.log('score error', error);
     }
-  }
+  };
 
   const outcome = () => {
-    if (score >= 10) {
-      return ("Excellent improvement")
-    } else if (score > 0 && score < 10) {
-      return ('Some improvement');
-    }
-    else if (score < 0 && score > -10) {
-      return ('Noticeable deterioration');
-    }
-    else if (score <= -10) {
-      return ("severe deterioration")
-    }
-  }
+    if (score >= 10) return 'Excellent improvement';
+    if (score > 0 && score < 10) return 'Some improvement';
+    if (score < 0 && score > -10) return 'Noticeable deterioration';
+    if (score <= -10) return 'Severe deterioration';
+    return '';
+  };
 
   const messageOutcome = () => {
-    if (score >= 10) {
-      return ("maintain your progress through regular exercise.*")
-    } else if (score > 0 && score < 10) {
-      return ('increase your progress through regular exercise.*');
-    }
-    else if (score < 0 && score > -10) {
-      return ('make progress through regular exercise.*');
-    }
-    else if (score <= -10) {
-      return ("make a comeback through regular exercise.*")
-    }
-  }
+    if (score >= 10) return 'maintain your progress through regular exercise.*';
+    if (score > 0 && score < 10) return 'increase your progress through regular exercise.*';
+    if (score < 0 && score > -10) return 'make progress through regular exercise.*';
+    if (score <= -10) return 'make a comeback through regular exercise.*';
+    return '';
+  };
 
   const close = () => {
     setCompletionCount(0);
     setCurrentScreen('counter');
     setStepCount(0);
     setCounter(180);
-  }
+  };
 
   const shareProgress = async () => {
-    const shareOptions = {
-      message: 'This is a test'
-    }
     try {
-      const shareResponse = await Share.share(shareOptions)
-      console.log(shareResponse);
+      await Share.share({ message: 'This is a test' });
+    } catch (error) {
+      console.log('Error', error);
     }
-    catch (error) {
-      console.log('Error', error)
-    }
-  }
+  };
 
-  const data = useRef({
-    x: 0,
-    y: 0,
-    z: 0,
-  });
+  const data = useRef({ x: 0, y: 0, z: 0 });
 
   const [subscription, setSubscription] = useState(null);
   const recentAccelerationData = useRef([]);
   const steps = useRef([]);
   const [stepCount, setStepCount] = useState(0);
-  let stepDone = useRef(true); //variable used with the BleCounter component to keep track of whether a step has been completed.
+  let stepDone = useRef(true); // used in BleCounter to track completed steps
 
   const _subscribe = () => {
-    setSubscription(true)
+    setSubscription(true);
     startTime.current = new Date().getTime();
     setStepCount(0);
     recentAccelerationData.current = [];
@@ -221,12 +186,11 @@ export default function Counter(props) {
       setStepCount(0);
       await savingSteps();
       _unsubscribe();
-      setCompletionCount(completionCount + 1);
-      console.log('completionCount:', completionCount);
+      setCompletionCount(prev => prev + 1);
     } else {
       setStepCount(steps.current.length);
     }
-  }
+  };
 
   const _unsubscribe = () => {
     subscription && setSubscription(false);
@@ -234,13 +198,13 @@ export default function Counter(props) {
   };
 
   // function to check if a new step has been taken
-  const { checkNewStep } = BleCounter({stepDone, tallyLatestSteps, bleCharacteristic});
+  const { checkNewStep } = BleCounter({ stepDone, tallyLatestSteps, bleCharacteristic });
 
   // if the user is subscribed to the BLE characteristic, check for new steps
   if (subscription) {
     bleCharacteristic.onChange = checkNewStep();
   }
-    
+
   useEffect(() => {
     steps.current = [];
     return () => _unsubscribe();
@@ -251,151 +215,180 @@ export default function Counter(props) {
 
   if (currentScreen === 'counter') {
     return (
-      <View style={styles.screen}>
-        {/* ADDED: show onboarding modal over the Counter */}
-        {showOnboarding && (
-          <DeviceSetupOnboarding
-            visible={showOnboarding}
-            onFinish={() => setShowOnboarding(false)}
-          />
-        )}
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <View style={styles.screen}>
+          {/* Onboarding modal over the Counter */}
+          {showOnboarding && (
+            <DeviceSetupOnboarding
+              visible={showOnboarding}
+              onFinish={() => setShowOnboarding(false)}
+            />
+          )}
 
-        <Card style={styles.card}>
-          <Card.Content>
-            <Title style={styles.titleText}>Steps</Title>
-            <Paragraph style={styles.titleText}>{stepCount}</Paragraph>
-          </Card.Content>
-          <ManuallyCounter visible={subscription} tallyLatestSteps={tallyLatestSteps} />
-          {/* a pop-up modal to prompt the user to connect to a BLE device */}
-          <Text>BLE characteristic: {bleCharacteristic}</Text>
-          {checkNewStep}
-          <TouchableOpacity onPress={_unsubscribe} style={styles.cancelButton} >
-            <Icon name={'close-circle'} color='red' size={45} />
-          </TouchableOpacity>
-          <Image source={exerciseImg} style={styles.image} ></Image>
-          <Card.Actions>
-            <TouchableOpacity onPress={subscription ? _unsubscribe : _subscribe} style={styles.button}>
-              <Text style={{ color: 'white', fontSize: 20 }}>{subscription ? 'Stop' : 'Go'}</Text>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Title style={styles.titleText}>Steps</Title>
+              <Paragraph style={styles.titleText}>{stepCount}</Paragraph>
+            </Card.Content>
+
+            <ManuallyCounter visible={subscription} tallyLatestSteps={tallyLatestSteps} />
+
+            {/* BLE status */}
+            <Text style={styles.bleText}>BLE characteristic: {bleCharacteristic}</Text>
+
+            {/* Removed accidental render of a function: {checkNewStep} */}
+
+            <TouchableOpacity onPress={_unsubscribe} style={styles.cancelButton}>
+              <Icon name={'close-circle'} color='red' size={45} />
             </TouchableOpacity>
-          </Card.Actions>
-          <ProgressBar progress={(stepCount * 0.50 / 30) + (completionCount * 0.50)} width={300} height={25} color={'#A0CE4E'} style={{ marginBottom: 20, marginLeft: 30, marginRight: 20, marginTop: 40 }} borderRadius={10} />
-        </Card>
-      </View>
+
+            <Image source={exerciseImg} style={styles.image} />
+
+            <Card.Actions>
+              <TouchableOpacity onPress={subscription ? _unsubscribe : _subscribe} style={styles.button}>
+                <Text style={styles.buttonLabel}>{subscription ? 'Stop' : 'Go'}</Text>
+              </TouchableOpacity>
+            </Card.Actions>
+
+            {/* Responsive progress bar with safe padding */}
+            <View style={styles.progressWrap}>
+              <ProgressBar
+                progress={(stepCount * 0.50 / 30) + (completionCount * 0.50)}
+                width={null}
+                height={20}
+                color={'#A0CE4E'}
+                borderRadius={10}
+              />
+            </View>
+          </Card>
+        </View>
+      </SafeAreaView>
     );
-  }
-
-  else if (currentScreen === 'break') {
-    const { displayHours, displayMinutes, displaySeconds } = clockify();
-
+  } else if (currentScreen === 'break') {
+    const { displayMinutes, displaySeconds } = clockify();
     return (
-      <View style={styles.screen}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <Title style={styles.breakTitleText}>Relax while you can, next set starts in</Title>
-            <Paragraph style={styles.breakTitleText}>{`${displayMinutes}:${displaySeconds}`}</Paragraph>
-          </Card.Content>
-          <Image source={exerciseImg} style={styles.image} ></Image>
-        </Card>
-      </View>
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <View style={styles.screen}>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Title style={styles.breakTitleText}>Relax while you can, next set starts in</Title>
+              <Paragraph style={styles.breakTitleText}>{`${displayMinutes}:${displaySeconds}`}</Paragraph>
+            </Card.Content>
+            <Image source={exerciseImg} style={styles.image} />
+          </Card>
+        </View>
+      </SafeAreaView>
     );
-  }
-
-  else if (currentScreen === 'result') {
+  } else if (currentScreen === 'result') {
     return (
-      <View style={styles.screen}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <Title style={styles.resultText}>Test Result</Title>
-            <Paragraph style={styles.resultText}>{score}</Paragraph>
-          </Card.Content>
-          <Card.Actions>
-            <TouchableOpacity onPress={() => shareProgress()} style={styles.shareButton}>
-              <FontAwesome5 name="share-square" size={40} color="red" />
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <View style={styles.screen}>
+          <Card style={styles.card}>
+            <Card.Content>
+              <Title style={styles.resultText}>Test Result</Title>
+              <Paragraph style={styles.resultText}>{score}</Paragraph>
+            </Card.Content>
+
+            <Card.Actions>
+              <TouchableOpacity onPress={shareProgress} style={styles.shareButton}>
+                <FontAwesome5 name="share-square" size={40} color="red" />
+              </TouchableOpacity>
+            </Card.Actions>
+
+            <Text style={styles.resultText}>{outcome()}</Text>
+
+            <Speedometer
+              value={score}
+              fontFamily='squada-one'
+              size={200}
+              angle={160}
+              max={20}
+              backgroundColor='transparent'
+            >
+              <Background angle={180} color="#cbcdd3" />
+              <Arc arcWidth={30} />
+              <Needle />
+              <Progress />
+              <Marks step={10} />
+              <Indicator fixValue />
+              <DangerPath />
+            </Speedometer>
+
+            <TouchableOpacity onPress={() => Linking.openURL('https://stedi.me')} style={styles.visitSiteButton}>
+              <Text style={styles.buttonLabel}>Visit Site</Text>
             </TouchableOpacity>
-          </Card.Actions>
-          <Text style={styles.resultText}>{outcome()}</Text>
-          <Speedometer
-            value={score}
-            fontFamily='squada-one'
-            size={200}
-            angle={160}
-            max={20}
-            backgroundColor='transparent'
-          >
-            <Background angle={180} color="#cbcdd3" />
-            <Arc arcWidth={30} />
-            <Needle />
-            <Progress />
-            <Marks step={10} />
-            <Indicator  fixValue/>
-            <DangerPath />
-          </Speedometer>
-          <TouchableOpacity onPress={() => Linking.openURL('https://stedi.me')} style={styles.visitSiteButton}>
-            <Text style={{ color: 'white', fontSize: 20 }}>Visit Site</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={close} style={styles.closeButton}>
-            <Text style={{ color: 'white', fontSize: 20 }}>Close</Text>
-          </TouchableOpacity>
-        </Card>
-      </View>
+
+            <TouchableOpacity onPress={close} style={styles.closeButton}>
+              <Text style={styles.buttonLabel}>Close</Text>
+            </TouchableOpacity>
+          </Card>
+        </View>
+      </SafeAreaView>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#F5F7FB' },
+
   screen: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#ecf0f3'
+    padding: 10, // gives ProgressBar room on small screens
+    backgroundColor: '#F5F7FB'
   },
+
   card: {
-    margin: 10,
     borderRadius: 15,
     padding: 10,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2
   },
-  titleText: {
-    fontSize: 24,
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  breakTitleText: {
-    fontSize: 20,
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  resultText: {
-    fontSize: 24,
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  cancelButton: {
-    alignSelf: 'center',
-    margin: 10,
-  },
+
+  titleText: { fontSize: 24, textAlign: 'center', marginVertical: 10 },
+  breakTitleText: { fontSize: 20, textAlign: 'center', marginVertical: 10 },
+  resultText: { fontSize: 24, textAlign: 'center', marginVertical: 10 },
+
+  bleText: { alignSelf: 'center', color: '#334B61' },
+
+  cancelButton: { alignSelf: 'center', margin: 10 },
+
   image: {
     width: '100%',
     height: 200,
     resizeMode: 'contain',
-    marginVertical: 20,
+    marginVertical: 20
   },
+
   button: {
     alignSelf: 'center',
     backgroundColor: '#A0CE4E',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 5
   },
-  shareButton: {
-    alignSelf: 'center',
-    marginVertical: 10,
+  buttonLabel: { color: 'white', fontSize: 20 },
+
+  progressWrap: {
+    width: '100%',
+    paddingHorizontal: 10,
+    marginTop: 20,
+    marginBottom: 10,
+    alignSelf: 'center'
   },
+
+  shareButton: { alignSelf: 'center', marginVertical: 10 },
+
   visitSiteButton: {
     alignSelf: 'center',
     backgroundColor: '#A0CE4E',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    marginVertical: 20,
+    marginVertical: 20
   },
   closeButton: {
     alignSelf: 'center',
@@ -403,6 +396,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    marginVertical: 20,
-  },
+    marginVertical: 20
+  }
 });
