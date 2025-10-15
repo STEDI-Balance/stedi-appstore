@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { TouchableOpacity, StyleSheet, Text, View, Share, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card, Avatar, Title, Caption } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { UserContext } from "../utils/context";
 
 const Profile = (props) => {
-  const [userName, setUserName] = useState("");
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const getUserInfo = async () => {
-      const stored = await AsyncStorage.getItem("userName");
-      setUserName(stored ?? "");
-    };
-    getUserInfo();
-  }, []);
+  const {user} = useContext(UserContext);
+
 
   const myCustomerShare = async () => {
     try {
@@ -25,15 +20,20 @@ const Profile = (props) => {
     }
   };
 
+  const avatarLabel = user.userName?.split(" ")
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("")
+    .slice(0, 2);
+
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Card style={styles.card} mode="elevated">
           <Card.Content style={styles.cardContent}>
             <View style={styles.header}>
-              <Avatar.Image source={{ uri: null }} size={72} />
+              <Avatar.Text label={avatarLabel} size={72} />
               <View style={styles.userInfo}>
-                <Text style={styles.title} numberOfLines={2}>{userName}</Text>
+                <Text style={styles.title} numberOfLines={2}>{user.userName}</Text>
               </View>
             </View>
 

@@ -106,7 +106,6 @@ export default function Counter(props) {
     testTime.current = lastStep.time - firstStep.time;
 
     let previousTime = startTime.current;
-    const stepPoints = [];
     steps.current.forEach(stepObject => {
       const stepTime = stepObject.time - previousTime;
       previousTime = stepObject.time;
@@ -246,7 +245,7 @@ export default function Counter(props) {
 
   const { x, y, z } = data.current;
   let total_amount_xyz = Math.sqrt(x * x + y * y + z * z) * 9.81;
-DeviceSetupOnboarding
+
   if (currentScreen === 'counter') {// Styles for Counter screen and functionality behind buttons.
     return (
       <View style={styles.screen}>
