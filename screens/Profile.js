@@ -1,73 +1,80 @@
-import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Share } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card, Avatar, Title, Caption } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import React, { useContext, useEffect, useState } from "react";
+import { TouchableOpacity, StyleSheet, Text, View, Share, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Card, Avatar, Title, Caption } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { UserContext } from "../utils/context";
 
 const Profile = (props) => {
-  const [userName, setUserName] = useState("");
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const getUserInfo = async () => {
-      const userName = await AsyncStorage.getItem('userName');
-      console.log('userName', userName);
-      setUserName(userName);
-    };
-    getUserInfo();
-  }, []);
+  const {user} = useContext(UserContext);
+
 
   const myCustomerShare = async () => {
-    const shareOptions = {
-      message: 'This is a test'
-    };
     try {
-      const shareResponse = await Share.share(shareOptions);
-      console.log(shareResponse);
+      await Share.share({ message: "This is a test" });
     } catch (error) {
-      console.log('Error', error);
+      console.log("Error", error);
     }
   };
 
+  const avatarLabel = user.userName?.split(" ")
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("")
+    .slice(0, 2);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <View style={styles.header}>
-            <Avatar.Image source={{ uri: null }} size={80} />
-            <View style={styles.userInfo}>
-              <Text style={styles.title}>{userName}</Text>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <Card style={styles.card} mode="elevated">
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.header}>
+              <Avatar.Text label={avatarLabel} size={72} />
+              <View style={styles.userInfo}>
+                <Text style={styles.title} numberOfLines={2}>{user.userName}</Text>
+              </View>
             </View>
-          </View>
-          <Text style={styles.indexScoreTitle}>Your Index Score balance progress</Text>
-          <View style={styles.infoBoxWrapper}>
-            <View style={styles.infoBox}>
-              <Title>20</Title>
-              <Caption>Weekly index score</Caption>
-              <Text>random balance</Text>
+
+            <Text style={styles.indexScoreTitle}>Your Index Score balance progress</Text>
+
+            <View style={styles.divider} />
+
+            <View style={styles.infoRow}>
+              <View style={styles.infoBox}>
+                <Title>20</Title>
+                <Caption>Weekly index score</Caption>
+                <Text style={styles.subText}>random balance</Text>
+              </View>
+
+              <View style={styles.infoBox}>
+                <Title>50</Title>
+                <Caption>Monthly index score</Caption>
+                <Text style={styles.subText}>random balance</Text>
+              </View>
             </View>
-          </View>
-          <View style={styles.infoBoxWrapper2}>
-            <Title>50</Title>
-            <Caption>Monthly index score</Caption>
-            <Text>random balance</Text>
-          </View>
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.shareButton} onPress={myCustomerShare}>
-              <Text style={styles.buttonText}>Share</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.logoutButton} onPress={() => {
-              AsyncStorage.removeItem("sessionToken");
-              AsyncStorage.removeItem("onBoarded");
-              props.setLoggedInState('NOT_LOGGED_IN');
-              navigation.replace('Login');
-            }}>
-              <Text style={styles.buttonText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </Card.Content>
-      </Card>
+
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity style={styles.shareButton} onPress={myCustomerShare}>
+                <Text style={styles.buttonText}>Share</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={async () => {
+                  await AsyncStorage.removeItem("sessionToken");
+                  await AsyncStorage.removeItem("onBoarded");
+                  props.setLoggedInState("NOT_LOGGED_IN");
+                  navigation.replace("Login");
+                }}
+              >
+                <Text style={styles.buttonText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </Card.Content>
+        </Card>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -75,81 +82,77 @@ const Profile = (props) => {
 export default Profile;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  safe: { flex: 1, backgroundColor: "#F5F7FB" },
+
+  // page padding so cards can be full-width without fixed width
+  scroll: { padding: 16, gap: 16, paddingBottom: 32 },
+
   card: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    marginTop: 10,
-    marginBottom: 10,
-    width: 340,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    // use full width minus page padding
+    width: "100%",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.23,
-    shadowRadius: 2.62,
-    elevation: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 2
   },
+  cardContent: { gap: 16 },
+
   header: {
-    flexDirection: 'row',
-    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16
   },
   userInfo: {
-    marginLeft: 20,
-    justifyContent: 'center',
+    flex: 1,                 // take remaining space
+    minWidth: 0              // allow text to shrink/wrap
   },
   title: {
     fontSize: 18,
-    marginBottom: 5,
+    fontWeight: "600",
+    color: "#0F1D2B",
+    flexShrink: 1,           // prevents overflow on long emails
+    flexWrap: "wrap"
   },
+
   indexScoreTitle: {
-    marginTop: 25,
-    marginBottom: 10,
-    color: '#A0CE4E',
-    fontSize: 17,
-    fontWeight: 'bold',
+    color: "#7DB343",
+    fontSize: 16,
+    fontWeight: "800"
   },
-  infoBoxWrapper: {
-    borderBottomColor: '#dddddd',
-    borderBottomWidth: 1,
-    borderTopColor: '#dddddd',
-    borderTopWidth: 1,
-    marginTop: 5,
-    height: 100,
+
+  divider: {
+    height: 1,
+    backgroundColor: "#E4EAF2",
+    width: "100%"
   },
-  infoBoxWrapper2: {
-    borderBottomColor: '#dddddd',
-    borderBottomWidth: 1,
-    marginTop: 5,
-    height: 100,
+
+  // two boxes side-by-side that wrap on small screens
+  infoRow: {
+    flexDirection: "row",
+    gap: 16,
+    flexWrap: "wrap"
   },
   infoBox: {
-    marginBottom: 10,
-    marginTop: 5,
+    flexGrow: 1,
+    flexBasis: 160,
+    gap: 2
   },
-  buttonsContainer: {
-    marginTop: 30,
-  },
+  subText: { color: "#334B61" },
+
+  buttonsContainer: { marginTop: 8, gap: 12 },
   shareButton: {
-    alignItems: 'center',
-    backgroundColor: '#67a3d9',
-    padding: 10,
-    marginTop: 5,
-    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#67a3d9",
+    paddingVertical: 12,
+    borderRadius: 10
   },
   logoutButton: {
-    alignItems: 'center',
-    backgroundColor: 'black',
-    padding: 10,
-    marginTop: 12,
-    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    borderRadius: 10
   },
-  buttonText: {
-    color: 'white',
-  },
+  buttonText: { color: "#FFFFFF", fontWeight: "700" }
 });
