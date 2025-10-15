@@ -57,6 +57,29 @@ export default function SignUp() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Helper functions for unit conversions
+  const convertHeightToCm = (heightDec, heightUnit, unit) => {
+    if (unit === "imperial") {
+      // Convert feet and inches to centimeters
+      const totalInches = (heightDec * 12) + heightUnit;
+      return Math.round(totalInches * 2.54); // Convert inches to cm and round to integer
+    } else {
+      // Convert meters and centimeters to total centimeters
+      return Math.round((heightDec * 100) + heightUnit); // Convert to cm and round to integer
+    }
+  };
+
+  const convertWeightToGrams = (weightDec, weightUnit, unit) => {
+    if (unit === "imperial") {
+      // Convert pounds and ounces to grams
+      const totalOunces = (weightDec * 16) + weightUnit;
+      return Math.round(totalOunces * 28.3495); // Convert ounces to grams and round to integer
+    } else {
+      // Convert kg and grams to total grams
+      return Math.round((weightDec * 1000) + weightUnit); // Convert to grams and round to integer
+    }
+  };
+
   const onChangeFormValue = (key, value) => {
     setForm({ ...form, [key]: value });
     // Clear error when user starts typing
@@ -235,6 +258,16 @@ export default function SignUp() {
         region: region,
         gender: form.gender || "Male",
       };
+
+      // Add height and weight if user agreed to share anonymous data
+      if (form.agreeAnonymous && form.heightDec > 0 && form.weightDec > 0) {
+        // Convert height and weight to metric units as integers
+        const heightInCm = convertHeightToCm(form.heightDec, form.heightUnit, unit.height);
+        const weightInGrams = convertWeightToGrams(form.weightDec, form.weightUnit, unit.weight);
+        
+        customerData.height = heightInCm; // Height in centimeters (integer)
+        customerData.weight = weightInGrams; // Weight in grams (integer)
+      }
 
       const response = await fetch("https://dev.stedi.me/customer", {
         method: "POST",
