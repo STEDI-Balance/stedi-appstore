@@ -37,20 +37,61 @@ export default function SignUp() {
     password: "",
     confirmPassword: "",
     gender: "",
-    heightDec: 0,
-    heightUnit: 0,
-    weightDec: 0,
-    weightUnit: 0,
+    heightCm: 0,
+    weightKg: 0,
     agreeAnonymous: false,
     agreeSMS: false,
     agreePrivacy: false,
     agreeTerms: false,
     agreeCookie: false,
   });
+
+  //Current unit type, imperial or metric
   const [unit, setUnit] = useState({
-    height: "imperial",
-    weight: "imperial",
+    heightAndWeight: "imperial"
   });
+
+  //Opposite of current unit type, imperial or metric
+  function oppositOfImperialOrMetric(currentUnit) {
+    return currentUnit === "imperial" ? "metric" : "imperial";
+  };
+  
+  //Handel press of switch unit button
+  const handelSwitchUnitButtonPress = () => {
+    setUnit(prev => ({
+      ...prev,
+      heightAndWeight: oppositOfImperialOrMetric(prev.heightAndWeight)
+    }));
+  };
+
+  //Height or weight, as imperial or metric
+  function heightOrWeightInCurrentUnit(currentUnit, weightOrHeight, value) {
+    //Return weight or height
+    if (weightOrHeight === "height") {
+      //Return height
+      if (currentUnit === "imperial") {
+        //Return height in feet and inches
+        let feet = Math.floor((value / 100) * 3.28);
+        let inches = Math.floor(((value / 100) * 3.28) % 12);
+        return `${feet}'${inches}"`;
+      } else {
+        //Return height in meters and centameters
+        let centameters = value % 100;
+        let meters = Math.floor(value / 100);
+        return `${meters}M, ${centameters}CM`;
+      }
+    } else {
+      //Return weight
+      if (currentUnit === "imperial") {
+        //Return weight in pounds
+        return `${Math.floor(value * 2.2)}LBs`;
+      } else {
+        //Return weight in kilograms
+        return `${value}KG`;
+      }
+    }
+  }
+
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -121,11 +162,11 @@ export default function SignUp() {
 
     // Height and weight validation (if agree to share anonymous data is checked)
     if (form.agreeAnonymous) {
-      if (form.heightDec === 0) {
-        newErrors.heightDec = "Height is required when sharing anonymous data";
+      if (form.heightCm === 0) {
+        newErrors.heightCm = "Height is required when sharing anonymous data";
       }
-      if (form.weightDec === 0) {
-        newErrors.weightDec = "Weight is required when sharing anonymous data";
+      if (form.weightKg === 0) {
+        newErrors.weightKg = "Weight is required when sharing anonymous data";
       }
     }
 
@@ -221,7 +262,9 @@ export default function SignUp() {
       const customerData = {
         customerName: form.name.trim(), // Use the name from the form
         email: form.email,
+        heightCm: form.heightCm, //New
         phone: fullPhone,
+        weightKg: form.weightKg, //New
         whatsAppPhone: fullPhone,
         birthDay: formattedBirthday,
         region: region,
@@ -425,169 +468,46 @@ export default function SignUp() {
               {errors.gender}
             </HelperText>
           </View>
+
+        {/* Height and Weight sliders, visable when agreed to share anonymous data */}
           <Collapsible open={form.agreeAnonymous}>
-            {/* Height */}
-            <View>
-              <View style={styles.units.unityHeader}>
-                <Text>Height</Text>
-                <View style={styles.units.unityHeaderController}>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("height", "imperial")}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: unit.height === "imperial" ? "700" : "400",
-                        textDecorationLine:
-                          unit.height === "imperial" ? "underline" : "none",
-                      }}
-                    >
-                      Ft
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("height", "metric")}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: unit.height === "metric" ? "700" : "400",
-                        textDecorationLine:
-                          unit.height === "metric" ? "underline" : "none",
-                      }}
-                    >
-                      m
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles.units.sliderContainer}>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.height === "imperial" ? `0'` : `0 M`}</Text>
-                    <Text>{unit.height === "imperial" ? `10'` : `2 M`}</Text>
-                  </View>
-                  <Slider
-                    value={form.heightDec}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("heightDec", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.height === "imperial" ? 10 : 2}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.heightDec
-                  ).toFixed(0)}${
-                    unit.height === "imperial" ? "'" : " M"
-                  }`}</Text>
-                </View>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.height === "imperial" ? `0"` : `0 cm`}</Text>
-                    <Text>{unit.height === "imperial" ? `11"` : `99 cm`}</Text>
-                  </View>
-                  <Slider
-                    value={form.heightUnit}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("heightUnit", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.height === "imperial" ? 11 : 99}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.heightUnit
-                  ).toFixed(0)}${
-                    unit.height === "imperial" ? '"' : " cm"
-                  }`}</Text>
-                </View>
-              </View>
-              <HelperText type="error" visible={!!errors.heightDec}>
-                {errors.heightDec}
+            {/* Metric or Imperial Button */}
+            <Button onPress={handelSwitchUnitButtonPress}>
+              <Text>Show units as {oppositOfImperialOrMetric(unit.heightAndWeight)}</Text>
+            </Button>
+
+            {/* Height Slider*/}
+              <Text>Height: {heightOrWeightInCurrentUnit(unit.heightAndWeight, "height", form.heightCm)}</Text>
+              <Slider
+              value={form.heightCm} 
+              step={1} 
+              onSlidingComplete={(value) => 
+              onChangeFormValue("heightCm", value)} 
+              min={55}
+              max={272}/>
+
+            {/* Height Error */}
+              <HelperText type="error" visible={!!errors.heightCm}>
+                {errors.heightCm}
               </HelperText>
-            </View>
-            <View>
-              <View style={styles.units.unityHeader}>
-                <Text>Weight</Text>
-                <View style={styles.units.unityHeaderController}>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("weight", "imperial")}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: unit.weight === "imperial" ? "700" : "400",
-                        textDecorationLine:
-                          unit.weight === "imperial" ? "underline" : "none",
-                      }}
-                    >
-                      lbs
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => onChangeUnit("weight", "metric")}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: unit.weight === "metric" ? "700" : "400",
-                        textDecorationLine:
-                          unit.weight === "metric" ? "underline" : "none",
-                      }}
-                    >
-                      kg
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={styles.units.sliderContainer}>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.weight === "imperial" ? `0 lbs` : `0 kg`}</Text>
-                    <Text>
-                      {unit.weight === "imperial" ? `300 lbs` : `136 kg`}
-                    </Text>
-                  </View>
-                  <Slider
-                    value={form.weightDec}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("weightDec", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.weight === "imperial" ? 300 : 136}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.weightDec
-                  ).toFixed(0)} ${
-                    unit.weight === "imperial" ? "lbs" : "kg"
-                  }`}</Text>
-                </View>
-                <View style={styles.units.slider}>
-                  <View style={styles.units.sliderMinMax}>
-                    <Text>{unit.weight === "imperial" ? `0 oz` : `0 g`}</Text>
-                    <Text>
-                      {unit.weight === "imperial" ? `15 oz` : `999 g`}
-                    </Text>
-                  </View>
-                  <Slider
-                    value={form.weightUnit}
-                    onSlidingComplete={(value) =>
-                      onChangeFormValue("weightUnit", value)
-                    }
-                    step={1}
-                    min={0}
-                    max={unit.weight === "imperial" ? 15 : 999}
-                  />
-                  <Text style={{ alignSelf: "center" }}>{`${Number(
-                    form.weightUnit
-                  ).toFixed(0)} ${
-                    unit.weight === "imperial" ? "oz" : "g"
-                  }`}</Text>
-                </View>
-              </View>
-              <HelperText type="error" visible={!!errors.weightDec}>
-                {errors.weightDec}
+                
+            {/* Weight Slider*/}
+              <Text>Weight: {heightOrWeightInCurrentUnit(unit.heightAndWeight, "weight", form.weightKg)}</Text>
+              <Slider
+              value={form.weightKg} 
+              step={1} 
+              onSlidingComplete={(value) => 
+              onChangeFormValue("weightKg", value)} 
+              min={2}
+              max={635}/>
+
+            {/* Weight Error */}
+              <HelperText type="error" visible={!!errors.weightKg}>
+                {errors.weightKg}
               </HelperText>
-            </View>
+
           </Collapsible>
+
           {/* Check box one */}
           <View style={styles.checkboxContainer}>
             <View style={Platform.OS === "ios" ? styles.checkbox : {}}>
@@ -624,6 +544,7 @@ export default function SignUp() {
               {errors.agreeSMS}
             </HelperText>
           </View>
+
           {/* Check box three */}
           <View>
             <View style={styles.checkboxContainer}>
@@ -644,6 +565,7 @@ export default function SignUp() {
               {errors.agreePrivacy}
             </HelperText>
           </View>
+
           {/* Check box four */}
           <View>
             <View style={styles.checkboxContainer}>

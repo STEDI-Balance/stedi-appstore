@@ -8,7 +8,6 @@ import SignUp from './screens/SignUp';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SignUp from './screens/SignUp';
 import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
 import { customTheme } from "./utils/Constants";
 

@@ -10,6 +10,7 @@
     "@react-navigation/native-stack": "^6.11.0",
     "@shopify/react-native-skia": "2.2.12",
     "babel-preset-expo": "^54.0.1",
+    "clean": "^4.0.2",
     "cross-env": "^7.0.3",
     "expo-build-properties": "~1.0.8",
     "expo-dev-client": "~6.0.12",
