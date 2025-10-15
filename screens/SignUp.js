@@ -11,7 +11,7 @@ import { Collapsible } from "../components/Collapsible";
 import { useNavigation } from "@react-navigation/native";
 import { Slider } from "../components/Slider";
 import { SecurityField } from "../components/SecurityField";
-import { countries } from "../utils/Constants";
+import { countries, customTheme } from "../utils/Constants";
 import {
   Button,
   HelperText,
@@ -777,16 +777,18 @@ const styles = StyleSheet.create({
   phoneInput: {
     height: 45,
     borderRadius: 10,
-    backgroundColor: "white",
   },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginVertical: 8,
+
   },
   checkbox: {
     borderRadius: 50,
+    backgroundColor: customTheme.colors.primaryContainer,
+      
   },
   checkboxText: {
     flex: 1,
@@ -826,6 +828,8 @@ const styles = StyleSheet.create({
     },
   },
 });
+
+
 
 const genderOptions = [
   { label: "Male", value: "male" },
