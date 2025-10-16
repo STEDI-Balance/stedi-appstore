@@ -69,6 +69,11 @@ export default function SignUp() {
 
   //Height or weight, as imperial or metric
   function heightOrWeightInCurrentUnit(currentUnit, weightOrHeight, value) {
+    //Future generations, I'd recommend that this function be split into two: one for height, and another for weight.
+    //Also, the number of inches never come sout right. I'd recommend that you have your 360 build a few unit tests
+    //  for this function
+
+
     //Return weight or height
     if (weightOrHeight === "height") {
       //Return height
@@ -293,9 +298,9 @@ export default function SignUp() {
       const customerData = {
         customerName: form.name.trim(), // Use the name from the form
         email: form.email,
-        heightCm: form.heightCm, //New
+        heightCm: form.heightCm,
         phone: fullPhone,
-        weightKg: form.weightKg, //New
+        weightKg: form.weightKg,
         whatsAppPhone: fullPhone,
         birthDay: formattedBirthday,
         region: region,
